@@ -26,7 +26,6 @@ jobs:
       - name: Validate Manifests
         run: |
           ./devops.sh lint
-          ./devops.sh generate
           git diff --exit-code
       - name: Create Kind Cluster
         uses: helm/kind-action@v1.3.0
