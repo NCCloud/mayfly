@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: website-1-temp
+  namespace: default
+  annotations:
+    mayfly.cloud.spaceship.com/expire: 10s
+data:
+  mysql-user-password: cUIzN3Y5cmo4bmN5TmI2NVVWMDQxMktZ
+type: Opaque
+---
+apiVersion: mysql.presslabs.org/v1alpha1
+kind: MysqlUser
+metadata:
+  name: website-1-temp
+  namespace: default
+  annotations:
+    mayfly.cloud.spaceship.com/expire: 10s
+spec:
+  allowedHosts:
+    - '%'
+  clusterRef:
+    name: mysql-cluster-0
+    namespace: database
+  password:
+    key: mysql-user-password
+    name: website-1-temp
+  permissions:
+    - permissions:
+        - ALL PRIVILEGES
+      schema: database-1
+      tables:
+        - '*'
+  user: user-1-temp

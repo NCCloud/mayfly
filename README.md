@@ -1,1 +1,1 @@
-== Mayfly Operator ==
+MayFly is an Ephemeral Resources Operator
