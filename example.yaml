@@ -20,7 +20,7 @@ spec:
   allowedHosts:
     - '%'
   clusterRef:
-    name: mysql-cluster-0
+    name: mysql-cluster-2-db
     namespace: database
   password:
     key: mysql-user-password
