@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/NCCloud/mayfly/pkg/common"
+	"github.com/NCCloud/mayfly/pkg/controllers/mayfly"
+	"github.com/NCCloud/mayfly/pkg/controllers/mayfly/resource"
+	"github.com/NCCloud/mayfly/pkg/scheduler"
 	"k8s.io/apimachinery/pkg/runtime"
-	"mayfly/pkg/common"
-	"mayfly/pkg/controllers/mayfly"
-	"mayfly/pkg/controllers/mayfly/resource"
-	"mayfly/pkg/scheduler"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"

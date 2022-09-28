@@ -9,7 +9,7 @@ import (
 	"github.com/go-co-op/gocron"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"mayfly/pkg/common"
+	"github.com/NCCloud/mayfly/pkg/common"
 )
 
 type Scheduler struct {
