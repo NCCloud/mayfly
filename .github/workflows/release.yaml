@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  release:
+    types: [released]
+
+env:
+  IMAGE: "easywp/mayfly"
+  REGISTRY: "quay.io"
+  GO_VERSION: "1.19"
+  TAG: ${{ github.event.release.tag_name }}
+jobs:
+  build-and-push:
+    name: Build & Push
+    runs-on: self-hosted
+    steps:
+      - name: Login
+        run: docker login -u ${{ secrets.QUAYIO_ACCESS_USERNAME }} -p ${{ secrets.QUAYIO_ACCESS_PASSWORD }} ${{ env.REGISTRY }}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Build Image
+        run: |
+          docker build --build-arg GITHUB_TOKEN=${{ secrets.LIB_REPO_GITHUB_TOKEN }} \
+            -t ${{ env.REGISTRY}}/${{ env.IMAGE }}:${TAG#v} .
+      - name: Push Image
+        run: |
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE }}:${TAG#v} ${{ env.REGISTRY }}/${{ env.IMAGE }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE }}:${TAG#v}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE }}:latest

@@ -1,0 +1,33 @@
+name: Linter
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  GOPRIVATE: "github:com/NCCloud/*"
+  GITHUB_USER: ${{ secrets.LIB_REPO_GITHUB_USER }}
+  GITHUB_TOKEN: ${{ secrets.LIB_REPO_GITHUB_TOKEN }}
+
+jobs:
+  linter:
+    name: Linter
+    runs-on: [self-hosted, docker]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - name: Initialize Github Token
+        run: git config --global url."https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
+      - name: Download Dependencies
+        run: go mod download
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.47.2
+          args: --timeout=10m
+          skip-pkg-cache: true
+          skip-build-cache: true

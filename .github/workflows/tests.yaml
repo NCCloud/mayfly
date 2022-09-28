@@ -1,0 +1,40 @@
+name: Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+env:
+  GO_VERSION: "1.19"
+  GOPRIVATE: "github:com/NCCloud/*"
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: [self-hosted, docker]
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Initialize Github Token
+        run: git config --global url."https://${{ secrets.LIB_REPO_GITHUB_USER }}:${{ secrets.LIB_REPO_GITHUB_TOKEN }}@github.com".insteadOf "https://github.com"
+      - name: Validate Manifests
+        run: |
+          ./devops.sh lint
+          git diff --exit-code
+      - name: Create Kind Cluster
+        uses: helm/kind-action@v1.3.0
+        with:
+          version: v0.14.0
+          node_image: kindest/node:v1.20.7
+      - name: Run tests
+        run: |
+          ./devops.sh test
+      - name: Coverage
+        run: |
+          go tool cover -func=cover.out
