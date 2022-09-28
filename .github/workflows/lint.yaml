@@ -1,0 +1,28 @@
+name: Lint
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: "1.19"
+  GOLANGCI_LINT_VERSION: "V1.50.1"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: [self-hosted, docker]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Download Dependencies
+        run: go mod download
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: --timeout=10m

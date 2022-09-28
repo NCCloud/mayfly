@@ -1,0 +1,31 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  GO_VERSION: "1.19"
+  GOPRIVATE: "github:com/NCCloud/*"
+
+jobs:
+  tests:
+    name: Test
+    runs-on: [self-hosted, docker]
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Coverage Report
+        uses: gwatts/go-coverage-action@v1
+        with:
+          coverage-threshold: 0
+          cover-pkg: ./...
+          ignore-pattern: |
+            .*cmd.*
+            .*mocks.*
