@@ -17,7 +17,7 @@ type ResourceConfig struct {
 }
 
 type GarbageCollectorConfig struct {
-	GarbageCollectionPeriod time.Duration `env:"GARBAGE_COLLECTION_PERIOD" envDefault:"10s"`
+	GarbageCollectionPeriod time.Duration `env:"GARBAGE_COLLECTION_PERIOD" envDefault:"30m"`
 }
 
 func NewOperatorConfig() *OperatorConfig {
