@@ -15,6 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-s -w" -o garbag
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /app
 
+COPY --from=builder /workspace/config.yaml .
 COPY --from=builder /workspace/manager .
 COPY --from=builder /workspace/garbage-collector .
 
