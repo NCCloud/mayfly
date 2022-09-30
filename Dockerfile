@@ -14,6 +14,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-s -w" -o mayfly
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /app
 
-COPY --from=builder /workspace/mayfly .
+COPY --from=builder /workspace .
 
 ENTRYPOINT ["/app/mayfly"]
