@@ -3,7 +3,6 @@ package mayfly
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/NCCloud/mayfly/pkg/common"
 	"github.com/NCCloud/mayfly/pkg/controllers/mayfly/resource"
@@ -49,16 +48,13 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	duration, parseDurationErr := time.ParseDuration(resource.GetAnnotations()[r.Config.ResourceConfiguration.MayflyExpireAnnotation])
-	if parseDurationErr != nil {
-		logger.Error(parseDurationErr, "Failed to parse duration.")
-		return ctrl.Result{}, parseDurationErr
+	hasExpired, expirationDate, hasExpiredErr := utils.HasExpired(resource, r.Config)
+	if hasExpiredErr != nil {
+		logger.Error(hasExpiredErr, "Error while checking if resource has expired.")
+		return ctrl.Result{}, hasExpiredErr
 	}
 
-	creationTime := resource.GetCreationTimestamp()
-	expirationDate := creationTime.Add(duration)
-
-	if expirationDate.Before(time.Now()) {
+	if hasExpired {
 		logger.Info("Resource already expired. Removing")
 		_ = utils.DeleteResource(ctx, r.Client, resource)
 	}
@@ -76,17 +72,17 @@ func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 		For(r.Resource.NewResourceInstance()).
 		WithEventFilter(predicate.Funcs{
 			CreateFunc: func(createEvent event.CreateEvent) bool {
-				annotation := createEvent.Object.GetAnnotations()[r.Config.ResourceConfiguration.MayflyExpireAnnotation]
-				return annotation != ""
+				mayFlylabel := createEvent.Object.GetLabels()[r.Config.ResourceConfiguration.MayflyExpireLabel]
+				return mayFlylabel != ""
 			},
 			DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
-				annotation := deleteEvent.Object.GetAnnotations()[r.Config.ResourceConfiguration.MayflyExpireAnnotation]
-				return annotation != ""
+				mayFlylabel := deleteEvent.Object.GetLabels()[r.Config.ResourceConfiguration.MayflyExpireLabel]
+				return mayFlylabel != ""
 			},
 			UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-				oldAnnotation := updateEvent.ObjectOld.GetAnnotations()[r.Config.ResourceConfiguration.MayflyExpireAnnotation]
-				newAnnotation := updateEvent.ObjectNew.GetAnnotations()[r.Config.ResourceConfiguration.MayflyExpireAnnotation]
-				if newAnnotation != "" && oldAnnotation != newAnnotation {
+				oldMayFlylabel := updateEvent.ObjectOld.GetLabels()[r.Config.ResourceConfiguration.MayflyExpireLabel]
+				newMayFlylabel := updateEvent.ObjectNew.GetLabels()[r.Config.ResourceConfiguration.MayflyExpireLabel]
+				if newMayFlylabel != "" && oldMayFlylabel != newMayFlylabel {
 					return true
 				}
 				return false

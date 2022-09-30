@@ -9,11 +9,13 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-s -w" -o mayfly cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-s -w" -o manager cmd/manager/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-s -w" -o garbage-collector cmd/garbagecollector/main.go
 
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /app
 
-COPY --from=builder /workspace .
+COPY --from=builder /workspace/manager .
+COPY --from=builder /workspace/garbage-collector .
 
-ENTRYPOINT ["/app/mayfly"]
+ENTRYPOINT ["/app/manager"]
