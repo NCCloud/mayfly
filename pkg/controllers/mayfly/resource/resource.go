@@ -13,3 +13,13 @@ func (r Resource) NewResourceInstance() client.Object {
 		},
 	}
 }
+
+func (r Resource) NewResourceInstanceList() *unstructured.UnstructuredList {
+	return &unstructured.UnstructuredList{
+		Object: map[string]interface{}{
+			"apiVersion": r.APIVersion,
+			"kind":       r.Kind + "List",
+		},
+		Items: []unstructured.Unstructured{},
+	}
+}

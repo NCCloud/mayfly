@@ -32,7 +32,7 @@ func NewScheduler(config *common.OperatorConfig, client client.Client) *Schedule
 func (s *Scheduler) StartMonitor() {
 	go func() {
 		for {
-			//TODO: Expose as metrics
+			// TODO: Expose as metrics
 			fmt.Println("=============")
 			fmt.Println("Total jobs: " + strconv.FormatInt(int64(len(s.Scheduler.Jobs())), 10))
 			for _, job := range s.Scheduler.Jobs() {
