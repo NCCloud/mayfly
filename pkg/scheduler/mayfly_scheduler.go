@@ -3,7 +3,6 @@ package scheduler
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -32,12 +31,14 @@ func NewScheduler(config *common.OperatorConfig, client client.Client) *Schedule
 func (s *Scheduler) StartMonitor() {
 	go func() {
 		for {
-			// TODO: Expose as metrics
-			fmt.Println("=============")
-			fmt.Println("Total jobs: " + strconv.FormatInt(int64(len(s.Scheduler.Jobs())), 10))
+			exportMayflyTotalJobsMetrics(float64(len(s.Scheduler.Jobs())))
+			pastJobs := 0
 			for _, job := range s.Scheduler.Jobs() {
-				fmt.Println("\tNext run: " + job.NextRun().String())
+				if job.NextRun().Before(time.Now()) {
+					pastJobs++
+				}
 			}
+			exportMayflyPastJobsMetrics(float64(pastJobs))
 			time.Sleep(time.Second * 5)
 		}
 	}()
