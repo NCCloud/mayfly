@@ -72,17 +72,17 @@ func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 		For(r.Resource.NewResourceInstance()).
 		WithEventFilter(predicate.Funcs{
 			CreateFunc: func(createEvent event.CreateEvent) bool {
-				mayFlylabel := createEvent.Object.GetLabels()[r.Config.ResourceConfiguration.MayflyExpireLabel]
-				return mayFlylabel != ""
+				mayFlyAnnotation := createEvent.Object.GetAnnotations()[r.Config.ResourceConfiguration.MayflyExpireLabel]
+				return mayFlyAnnotation != ""
 			},
 			DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
-				mayFlylabel := deleteEvent.Object.GetLabels()[r.Config.ResourceConfiguration.MayflyExpireLabel]
-				return mayFlylabel != ""
+				mayFlyAnnotation := deleteEvent.Object.GetAnnotations()[r.Config.ResourceConfiguration.MayflyExpireLabel]
+				return mayFlyAnnotation != ""
 			},
 			UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-				oldMayFlylabel := updateEvent.ObjectOld.GetLabels()[r.Config.ResourceConfiguration.MayflyExpireLabel]
-				newMayFlylabel := updateEvent.ObjectNew.GetLabels()[r.Config.ResourceConfiguration.MayflyExpireLabel]
-				if newMayFlylabel != "" && oldMayFlylabel != newMayFlylabel {
+				oldMayFlyAnnotation := updateEvent.ObjectOld.GetAnnotations()[r.Config.ResourceConfiguration.MayflyExpireLabel]
+				newMayFlyAnnotation := updateEvent.ObjectNew.GetAnnotations()[r.Config.ResourceConfiguration.MayflyExpireLabel]
+				if newMayFlyAnnotation != "" && oldMayFlyAnnotation != newMayFlyAnnotation {
 					return true
 				}
 				return false

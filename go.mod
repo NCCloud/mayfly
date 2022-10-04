@@ -3,9 +3,12 @@ module github.com/NCCloud/mayfly
 go 1.19
 
 require (
-	github.com/bitpoke/mysql-operator v0.6.2
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/go-co-op/gocron v1.17.0
+	github.com/go-echarts/go-echarts/v2 v2.2.4
+	github.com/go-logr/logr v1.2.3
+	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
+	github.com/prometheus/client_golang v1.12.2
 	k8s.io/apimachinery v0.25.2
 	sigs.k8s.io/controller-runtime v0.13.0
 )
@@ -19,7 +22,6 @@ require (
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/zapr v1.2.3 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
@@ -40,7 +42,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.12.2 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
