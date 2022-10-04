@@ -27,18 +27,19 @@ func NewResourcesCollector(logger logr.Logger, mgrClient client.Client, resource
 }
 
 func (e ResourcesCollector) Collect() error {
-	resources := e.resource.NewResourceInstanceList()
+	resourceList := e.resource.NewResourceInstanceList()
 
-	listOpts := []client.ListOption{}
-	listOpts = append(listOpts, client.HasLabels{e.operatorConfig.ResourceConfiguration.MayflyExpireLabel})
-	resourcesListErr := e.mgrClient.List(context.Background(), resources, listOpts...)
+	resourcesListErr := e.mgrClient.List(context.Background(), resourceList)
 
 	if resourcesListErr != nil {
 		e.logger.Error(resourcesListErr, "Failed to list resources")
 		return resourcesListErr
 	}
 
-	for _, resource := range resources.Items {
+	for _, resource := range resourceList.Items {
+		if resource.GetAnnotations()[e.operatorConfig.ResourceConfiguration.MayflyExpireLabel] == "" {
+			continue
+		}
 		hasExpired, _, hasExpiredErr := utils.HasExpired(&resource, e.operatorConfig)
 		if hasExpiredErr != nil {
 			e.logger.Error(hasExpiredErr, "Failed to check if resource has expired", "kind", resource.GetKind(), "name", resource.GetName())

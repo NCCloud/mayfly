@@ -18,7 +18,7 @@ func DeleteResource(ctx context.Context, client client.Client, resource client.O
 }
 
 func HasExpired(resource client.Object, config *common.OperatorConfig) (bool, time.Time, error) {
-	duration, parseDurationErr := time.ParseDuration(resource.GetLabels()[config.ResourceConfiguration.MayflyExpireLabel])
+	duration, parseDurationErr := time.ParseDuration(resource.GetAnnotations()[config.ResourceConfiguration.MayflyExpireLabel])
 	if parseDurationErr != nil {
 		return false, time.Time{}, parseDurationErr
 	}

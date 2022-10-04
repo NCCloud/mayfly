@@ -3,7 +3,7 @@ kind: Secret
 metadata:
   name: website-1-temp
   namespace: default
-  labels:
+  annotations:
     mayfly.cloud.spaceship.com/expire: 10s
 data:
   mysql-user-password: cUIzN3Y5cmo4bmN5TmI2NVVWMDQxMktZ
@@ -14,7 +14,7 @@ kind: MysqlUser
 metadata:
   name: website-1-temp
   namespace: default
-  labels:
+  annotations:
     mayfly.cloud.spaceship.com/expire: 10s
 spec:
   allowedHosts:
