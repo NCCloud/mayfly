@@ -36,7 +36,7 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if getErr := r.MgrClient.Get(ctx, req.NamespacedName, resource); getErr != nil {
 		if errors.IsNotFound(getErr) {
-			r.Scheduler.RemoveJob(fmt.Sprintf("%v", resource.GetUID()))
+			_ = r.Scheduler.RemoveJob(fmt.Sprintf("%v", resource.GetUID()))
 
 			return ctrl.Result{}, nil
 		}
@@ -55,6 +55,10 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		logger.Info("Resource already expired. Removing")
 
 		_ = r.MgrClient.Delete(ctx, resource)
+
+		_ = r.Scheduler.RemoveJob(fmt.Sprintf("%v", resource.GetUID()))
+
+		return ctrl.Result{}, nil
 	}
 
 	startJobErr := r.Scheduler.StartOrUpdateJob(ctx, expirationDate, func(ctx context.Context, client client.Client,

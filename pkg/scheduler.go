@@ -63,7 +63,7 @@ func (s *Scheduler) StartOrUpdateJob(ctx context.Context, expirationDate time.Ti
 			return nil
 		}
 
-		s.RemoveJob(fmt.Sprintf("%v", resource.GetUID()))
+		_ = s.RemoveJob(fmt.Sprintf("%v", resource.GetUID()))
 	}
 
 	_, jobErr := s.CronScheduler.
@@ -80,6 +80,6 @@ func (s *Scheduler) StartOrUpdateJob(ctx context.Context, expirationDate time.Ti
 	return nil
 }
 
-func (s *Scheduler) RemoveJob(id string) {
-	_ = s.CronScheduler.RemoveByTag(id)
+func (s *Scheduler) RemoveJob(id string) error {
+	return s.CronScheduler.RemoveByTag(id)
 }
