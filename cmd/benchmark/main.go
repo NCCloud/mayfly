@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/NCCloud/mayfly/pkg/common"
-	"github.com/NCCloud/mayfly/pkg/controllers/mayfly/resource"
+	"github.com/NCCloud/mayfly/pkg"
+
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/pkg/browser"
@@ -19,24 +19,17 @@ import (
 )
 
 var (
-	operatorConfig *common.OperatorConfig
-	config         *resource.Resources
-	mgrClient      client.Client
-	pageTitle      = "Mayfly Benchmark"
-	benchmarkHtml  = "mayfly_benchmark.html"
+	config        *pkg.Config
+	mgrClient     client.Client
+	pageTitle     = "Mayfly Benchmark"
+	benchmarkHtml = "mayfly_benchmark.html"
 )
 
 func init() {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	operatorConfig = common.NewOperatorConfig()
-
-	var configErr error
-	config, configErr = resource.NewConfig("./config.yaml")
-	if configErr != nil {
-		panic(configErr)
-	}
+	config = pkg.NewConfig()
 
 	var mgrClientErr error
 	mgrClient, mgrClientErr = client.New(ctrl.GetConfigOrDie(), client.Options{Scheme: scheme})
@@ -46,7 +39,7 @@ func init() {
 }
 
 func main() {
-	benchmark := NewBenchmark(mgrClient, config, operatorConfig, 10000).
+	benchmark := NewBenchmark(mgrClient, config, 10000).
 		Delay(0)
 
 	benchmark.Start()
@@ -69,7 +62,7 @@ func main() {
 		for _, point := range result.Points {
 			durations = append(durations, fmt.Sprintf("%.0fs", point.time.Sub(result.StartedAt).Seconds()))
 			for _, resource := range config.Resources {
-				data[resource.Kind] = append(data[resource.Kind], opts.LineData{Name: resource.Kind, Value: point.kind[resource.Kind]})
+				data[resource] = append(data[resource], opts.LineData{Name: resource, Value: point.kind[resource]})
 			}
 		}
 		Render(CreateChart(durations, data))
@@ -89,7 +82,7 @@ func Render(chart *charts.Line) {
 	}
 }
 
-func CreateChart(x []string, yz map[string][]opts.LineData) *charts.Line {
+func CreateChart(xAxis []string, yzAxis map[string][]opts.LineData) *charts.Line {
 	line := charts.NewLine()
 	line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
 		Title: pageTitle,
@@ -101,8 +94,8 @@ func CreateChart(x []string, yz map[string][]opts.LineData) *charts.Line {
 		Height:    "800px",
 		Theme:     "infographic",
 	}))
-	line.SetXAxis(x)
-	for kind, value := range yz {
+	line.SetXAxis(xAxis)
+	for kind, value := range yzAxis {
 		line.AddSeries(kind, value).SetSeriesOptions(
 			charts.WithAreaStyleOpts(opts.AreaStyle{
 				Opacity: 0.2,

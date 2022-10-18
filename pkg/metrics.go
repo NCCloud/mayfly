@@ -1,4 +1,4 @@
-package scheduler
+package pkg
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
@@ -7,14 +7,14 @@ import (
 
 var mayflyTotalJobs = prometheus.NewGauge(
 	prometheus.GaugeOpts{
-		Name: "mayfly_jobs_total",
+		Name: "mayfly_jobs",
 		Help: "Number of scheduled Mayfly Jobs",
 	},
 )
 
 var mayflyPastJobs = prometheus.NewGauge(
 	prometheus.GaugeOpts{
-		Name: "mayfly_jobs_total_past",
+		Name: "mayfly_jobs_past_jobs",
 		Help: "Number of past Mayfly Jobs",
 	},
 )
