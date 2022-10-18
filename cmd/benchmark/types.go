@@ -3,20 +3,19 @@ package main
 import (
 	"time"
 
-	"github.com/NCCloud/mayfly/pkg/common"
-	"github.com/NCCloud/mayfly/pkg/controllers/mayfly/resource"
+	"github.com/NCCloud/mayfly/pkg"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Benchmark struct {
-	granularity    time.Duration
-	config         *resource.Resources
-	mgrClient      client.Client
-	operatorConfig *common.OperatorConfig
-	startedAt      time.Time
-	count          int
-	offset         int
-	delay          time.Duration
+	granularity time.Duration
+	config      *pkg.Config
+	mgrClient   client.Client
+	startedAt   time.Time
+	count       int
+	offset      int
+	delay       time.Duration
 }
 
 type Result struct {
@@ -30,15 +29,14 @@ type Point struct {
 	time time.Time
 }
 
-func NewBenchmark(mgrClient client.Client, config *resource.Resources, operatorConfig *common.OperatorConfig, count int) *Benchmark {
+func NewBenchmark(mgrClient client.Client, config *pkg.Config, count int) *Benchmark {
 	return &Benchmark{
-		granularity:    5 * time.Second,
-		config:         config,
-		mgrClient:      mgrClient,
-		operatorConfig: operatorConfig,
-		count:          count,
-		offset:         0,
-		delay:          0,
+		granularity: 5 * time.Second,
+		config:      config,
+		mgrClient:   mgrClient,
+		count:       count,
+		offset:      0,
+		delay:       0,
 	}
 }
 

@@ -1,5 +1,0 @@
-resources:
-  - kind: MysqlUser
-    apiVersion: mysql.presslabs.org/v1alpha1
-  - kind: Secret
-    apiVersion: v1

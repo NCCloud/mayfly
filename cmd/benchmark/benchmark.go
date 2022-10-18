@@ -5,6 +5,8 @@ import (
 	"fmt"
 	time "time"
 
+	"github.com/NCCloud/mayfly/pkg"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -28,17 +30,17 @@ func (b *Benchmark) Listener() Result {
 		kind := make(map[string]int)
 		now := time.Now()
 		for _, resourceKind := range b.config.Resources {
-			resourceList := resourceKind.NewResourceInstanceList()
+			resourceList := pkg.NewResourceInstanceList(resourceKind)
 
 			resourcesListErr := b.mgrClient.List(context.Background(), resourceList)
 			if resourcesListErr != nil {
 				panic(resourcesListErr)
 			}
 			for _, resource := range resourceList.Items {
-				if resource.GetAnnotations()[b.operatorConfig.ResourceConfiguration.MayflyExpireLabel] == "" {
+				if resource.GetAnnotations()[b.config.ExpirationLabel] == "" {
 					continue
 				}
-				kind[resourceKind.Kind]++
+				kind[resourceKind]++
 			}
 
 		}
@@ -80,7 +82,7 @@ func (b *Benchmark) generateSecret(id int) *v1.Secret {
 			Name:      fmt.Sprintf("benchmark-%d", id),
 			Namespace: "default",
 			Annotations: map[string]string{
-				b.operatorConfig.ResourceConfiguration.MayflyExpireLabel: "10s",
+				b.config.ExpirationLabel: "10s",
 			},
 		},
 		Data: map[string][]byte{
