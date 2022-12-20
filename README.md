@@ -1,4 +1,4 @@
-<img src="https://user-images.githubusercontent.com/23269628/208615252-0d80978c-d1dc-4523-8ba6-8eee8e4a7f23.png)" width="600" alt="logo"/>
+<img src="https://user-images.githubusercontent.com/23269628/208615252-0d80978c-d1dc-4523-8ba6-8eee8e4a7f23.png" width="600" alt="logo"/>
 
 > Kubernetes operator that allows you to crete ephemeral resources on the cluster.
 
@@ -20,7 +20,7 @@ This environment variable is comma seperated list of "{ApiVersion};{Kind}" as te
 Example:
 ```
 export RESOURCES="v1;Secret,test.com/v1alpha;MyCRD"
-``
+```
 
 ## 🚀 Usage
 After you successfully set what is being watched by the mayfly, you can set the `mayfly.cloud.spaceship.com/expire` annotation to the resources with a duration value.
