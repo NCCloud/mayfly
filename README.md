@@ -1,4 +1,4 @@
-<img src="https://user-images.githubusercontent.com/23269628/208615252-0d80978c-d1dc-4523-8ba6-8eee8e4a7f23.png" width="600" alt="logo"/>
+<img src="https://abload.de/img/mayfly2c7fx3.png" width="600" alt="logo"/>
 
 > Kubernetes operator that allows you to crete ephemeral resources on the cluster.
 
