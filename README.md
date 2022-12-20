@@ -1,4 +1,4 @@
-<img src="https://abload.de/img/mayfly2c7fx3.png" width="600" alt="logo"/>
+<img src="https://abload.de/img/newproject7k0dn0.png" width="600" alt="logo"/>
 
 > Mayfly is a Kubernetes operator that enables you to create temporary resources on the cluster that will expire after a certain period of time.
 
