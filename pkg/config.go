@@ -1,8 +1,9 @@
 package pkg
 
 import (
-	"github.com/caarlos0/env/v6"
 	"time"
+
+	"github.com/caarlos0/env/v6"
 )
 
 type Config struct {

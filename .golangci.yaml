@@ -12,6 +12,9 @@ issues:
     - path: .*/metrics.go
       linters:
         - gochecknoglobals
+    - path: pkg/config.go
+      linters:
+        - lll
 run:
   go: '1.19'
   tests: false
