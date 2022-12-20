@@ -1,21 +1,18 @@
 <img src="https://abload.de/img/mayfly2c7fx3.png" width="600" alt="logo"/>
 
-> Kubernetes operator that allows you to crete ephemeral resources on the cluster that will expire.
+> Kubernetes operator that allows you to create ephemeral resources on the cluster that will expire.
 
 ## 📖 General Information
 
 ### 📄 Summary
 
-Mayfly allows you to have your resources on your cluster for a temporary time.
-It deletes those resources from cluster according to mayfly expiration annotation your put to set; how long the resource should be living. When you think about it, you can
-use it create temporary resources, temporary accesses or just to keep your cluster always clean and tidy.
+The Mayfly Operator allows you to have your resources on your cluster for a temporary time.
+It deletes those resources from the cluster, according to the Mayfly expiration annotation that you set to specify how long the resource should remain active. This can be used to create temporary resources, temporary accesses, or simply to keep your cluster organized and tidy.
 
 ### 🛠 Configuration
 
-Mayfly is easy to use and configurable project. Under to hood, it uses resource watches and schedulers to delete your
-resource right at the moment when you do.
-So, in order to set which resources should be watched and cleanup; you need to set it by the `RESOURCES` environment variable.
-This environment variable is comma seperated list of `{ApiVersion};{Kind}` as text.
+Mayfly is an easy-to-use and configurable project that uses resource watches and schedulers to delete your resources at the appropriate time. It is simple to set up and customize.
+To specify which resources should be monitored and cleaned up, you can set the `RESOURCES` environment variable to a comma-separated list of `{ApiVersion};{Kind}` as text. This allows you to customize which resources are targeted for cleanup.
 
 Example:
 ```
@@ -23,8 +20,8 @@ export RESOURCES="v1;Secret,test.com/v1alpha;MyCRD"
 ```
 
 ## 🚀 Usage
-After you successfully set what is being watched by the mayfly, you can set the `mayfly.cloud.spaceship.com/expire` annotation to the resources with a duration value.
-Please remember that expiration will be calculated by checking the creation of the resource.
+Once you have determined which resources you want Mayfly to monitor, you can set the `mayfly.cloud.spaceship.com/expire` annotation on those resources with a duration value. This will cause Mayfly to delete the resources once the specified duration has passed, based on the time of their creation. 
+Keep in mind that the expiration will be calculated based on the creation time of the resource.
 
 Example:
 ```
@@ -46,9 +43,7 @@ spec:
 
 ## 🛳️ Deployment
 
-Easiest, best and recommended way of deploying the mayfly operator into you Kubernetes cluster is using the helm chart of it.
-In order make it you should add our helm repository and install it from there by providing the RESOURCES environment variable.
-If you don't want to you can also compile easily and install however you want.
+The easiest and most recommended way to deploy the Mayfly operator to your Kubernetes cluster is by using the Helm chart. To do this, you will need to add our Helm repository and install it from there, providing the RESOURCES environment variable as needed. If you prefer, you can also compile the operator and install it using any method you choose.
 
 Example:
 ```
@@ -58,7 +53,7 @@ helm install mayfly nccloud/UPDATE_THIS --set RESOURCES="v1;Secret" #For only se
 
 ## 🛠 Development
 
-You can easily compile & run mayfly operator with the following steps.
+You can easily compile and run the Mayfly operator by following these steps:
 
 1) Create a Kubernetes Cluster or change context for the existing one.
 
@@ -69,27 +64,27 @@ kind create cluster
 2) Run the project with the following environment variable.
 
 ```bash
-export RESOURCES=v1;Secret # Mayfly will start to watch secrets in the cluster. Please check configuration section for more.
+export RESOURCES=v1;Secret # Mayfly will begin monitoring secrets in the cluster. For more information, see the configuration section.
 go run .
 ```
 
 ## 🏷️ Versioning
 
 We use [SemVer](http://semver.org/) for versioning.
-For the versions available, see the [tags on this repository](https://github.com/nccloud/mayfly/tags).
+To see the available versions, check the [tags on this repository](https://github.com/nccloud/mayfly/tags).
 
 ## ⭐️ Documentation
 
-For details on all the functionality in this library, see the [GoDoc](http://godoc.org/github.com/nccloud/mayfly) documentation.
+For more information about the functionality provided by this library, refer to the [GoDoc](http://godoc.org/github.com/nccloud/mayfly) documentation.
 
 
 ## 🤝 Contribution
 
-Contributions, issues and feature requests are welcome!<br />
-Feel free to check [issues page](https://github.com/nccloud/mayfly/issues) or create if you find one.
+We welcome contributions, issues, and feature requests!<br />
+If you have any issues or suggestions, please feel free to check the [issues page](https://github.com/nccloud/mayfly/issues) or create a new issue if you don't see one that matches your problem.
 
 
 ## 📝 License
 <img alt="logo" width="75" src="https://avatars.githubusercontent.com/u/7532706" /><br>
 This project is [MIT License](https://github.com/nccloud/mayfly) licensed.<br />
-Made with <span style="color: #e25555;">&hearts;</span> by DevOps team of Namecheap Cloud.
+Made with <span style="color: #e25555;">&hearts;</span> by the DevOps team at Namecheap Cloud.
