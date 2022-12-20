@@ -93,6 +93,6 @@ Feel free to check [issues page](https://github.com/nccloud/mayfly/issues) or cr
 
 Copyright © 2022 [Namecheap](https://www.namecheap.com).<br />
 This project is [MIT License](https://github.com/nccloud/mayfly) licensed.<br /><br />
-<img alt="logo" width="300" src="https://avatars.githubusercontent.com/u/7532706" />
+<img alt="logo" width="150" src="https://avatars.githubusercontent.com/u/7532706" />
 <br>
 Made with <span style="color: #e25555;">&hearts;</span> by DevOps team of Namecheap Cloud.
