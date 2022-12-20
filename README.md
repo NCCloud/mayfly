@@ -1,6 +1,6 @@
 <img src="https://abload.de/img/mayfly2c7fx3.png" width="600" alt="logo"/>
 
-> Kubernetes operator that allows you to crete ephemeral resources on the cluster.
+> Kubernetes operator that allows you to crete ephemeral resources on the cluster that will expire.
 
 ## 📖 General Information
 
@@ -15,7 +15,7 @@ use it create temporary resources, temporary accesses or just to keep your clust
 Mayfly is easy to use and configurable project. Under to hood, it uses resource watches and schedulers to delete your
 resource right at the moment when you do.
 So, in order to set which resources should be watched and cleanup; you need to set it by the `RESOURCES` environment variable.
-This environment variable is comma seperated list of "{ApiVersion};{Kind}" as text.
+This environment variable is comma seperated list of `{ApiVersion};{Kind}` as text.
 
 Example:
 ```
