@@ -11,19 +11,28 @@ import (
 )
 
 func IsExpired(resource client.Object, config *Config) (bool, time.Time, error) {
-	duration, parseDurationErr := time.ParseDuration(resource.GetAnnotations()[config.ExpirationLabel])
-	if parseDurationErr != nil {
-		return false, time.Time{}, parseDurationErr
+	var expirationDate time.Time
+
+	hasAnnotation, annotationLabel, annotationValue := HasMayFlyAnnotation(resource, config)
+
+	if hasAnnotation {
+		if annotationLabel == config.ExpirationLabel {
+			duration, parseDurationErr := time.ParseDuration(annotationValue)
+			if parseDurationErr != nil {
+				return false, time.Time{}, parseDurationErr
+			}
+			creationTime := resource.GetCreationTimestamp()
+			expirationDate = creationTime.Add(duration)
+		} else if annotationLabel == config.ExpirationDateLabel {
+			var parseTimeErr error
+			expirationDate, parseTimeErr = time.Parse(time.RFC3339, annotationValue)
+			if parseTimeErr != nil {
+				return false, time.Time{}, parseTimeErr
+			}
+		}
 	}
 
-	creationTime := resource.GetCreationTimestamp()
-	expirationDate := creationTime.Add(duration)
-
-	if expirationDate.Before(time.Now()) {
-		return true, expirationDate, nil
-	}
-
-	return false, expirationDate, nil
+	return expirationDate.Before(time.Now()), expirationDate, nil
 }
 
 func NewResourceInstance(apiVersionKind string) *unstructured.Unstructured {
@@ -46,4 +55,17 @@ func NewResourceInstanceList(apiVersionKind string) *unstructured.UnstructuredLi
 			"kind":       fmt.Sprintf("%sList", resourceInstance.GetKind()),
 		},
 	}
+}
+
+func HasMayFlyAnnotation(resource client.Object, config *Config) (bool, string, string) {
+	var annotation string
+	var value string
+	if resource.GetAnnotations()[config.ExpirationLabel] != "" {
+		annotation = config.ExpirationLabel
+		value = resource.GetAnnotations()[config.ExpirationLabel]
+	} else if resource.GetAnnotations()[config.ExpirationDateLabel] != "" {
+		annotation = config.ExpirationDateLabel
+		value = resource.GetAnnotations()[config.ExpirationDateLabel]
+	}
+	return value != "", annotation, value
 }

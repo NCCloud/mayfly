@@ -80,23 +80,18 @@ func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 		For(NewResourceInstance(r.APIVersionKind)).
 		WithEventFilter(predicate.Funcs{
 			CreateFunc: func(createEvent event.CreateEvent) bool {
-				mayFlyAnnotation := createEvent.Object.GetAnnotations()[r.Config.ExpirationLabel]
-
-				return mayFlyAnnotation != ""
+				hasAnnotation, _, _ := HasMayFlyAnnotation(createEvent.Object, r.Config)
+				return hasAnnotation
 			},
 			DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
-				mayFlyAnnotation := deleteEvent.Object.GetAnnotations()[r.Config.ExpirationLabel]
-
-				return mayFlyAnnotation != ""
+				hasAnnotation, _, _ := HasMayFlyAnnotation(deleteEvent.Object, r.Config)
+				return hasAnnotation
 			},
 			UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-				oldMayFlyAnnotation := updateEvent.ObjectOld.GetAnnotations()[r.Config.ExpirationLabel]
-				newMayFlyAnnotation := updateEvent.ObjectNew.GetAnnotations()[r.Config.ExpirationLabel]
-				if newMayFlyAnnotation != "" && oldMayFlyAnnotation != newMayFlyAnnotation {
-					return true
-				}
+				_, oldAnnotationLabel, oldAnnotationValue := HasMayFlyAnnotation(updateEvent.ObjectOld, r.Config)
+				hasNewAnnotation, newAnnotationLabel, newAnnotationValue := HasMayFlyAnnotation(updateEvent.ObjectNew, r.Config)
 
-				return false
+				return hasNewAnnotation && (oldAnnotationLabel != newAnnotationLabel || oldAnnotationValue != newAnnotationValue)
 			},
 		}).Complete(r)
 }
