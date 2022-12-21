@@ -9,6 +9,7 @@ env:
   REGISTRY: "quay.io"
   GO_VERSION: "1.19"
   TAG: ${{ github.event.release.tag_name }}
+
 jobs:
   build-and-push:
     name: Build & Push
@@ -31,3 +32,33 @@ jobs:
           docker tag ${{ env.REGISTRY }}/${{ env.IMAGE }}:${TAG#v} ${{ env.REGISTRY }}/${{ env.IMAGE }}:latest
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE }}:${TAG#v}
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE }}:latest
+    
+  helm-release:
+    name: Helm Release
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.10.0
+      - name: Package charts in ./charts
+        run: |
+          rm -rf .cr-release-packages
+          mkdir -p .cr-release-packages
+          helm package charts/* --app-version=${TAG#v} --version=${TAG#v} --destination=.cr-release-packages
+      - name: Run chart-releaser
+        uses: askcloudarchitech/chart-releaser-action@skip-packaging-option
+        with:
+          skip_packaging: true
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
