@@ -15,20 +15,19 @@ func IsExpired(resource client.Object, config *Config) (bool, time.Time, error) 
 
 	hasAnnotation, annotationLabel, annotationValue := HasMayFlyAnnotation(resource, config)
 
-	if hasAnnotation {
-		if annotationLabel == config.ExpirationLabel {
-			duration, parseDurationErr := time.ParseDuration(annotationValue)
-			if parseDurationErr != nil {
-				return false, time.Time{}, parseDurationErr
-			}
-			creationTime := resource.GetCreationTimestamp()
-			expirationDate = creationTime.Add(duration)
-		} else if annotationLabel == config.ExpirationDateLabel {
-			var parseTimeErr error
-			expirationDate, parseTimeErr = time.Parse(time.RFC3339, annotationValue)
-			if parseTimeErr != nil {
-				return false, time.Time{}, parseTimeErr
-			}
+	if hasAnnotation && annotationLabel == config.ExpirationLabel {
+		duration, parseDurationErr := time.ParseDuration(annotationValue)
+		if parseDurationErr != nil {
+			return false, time.Time{}, parseDurationErr
+		}
+
+		creationTime := resource.GetCreationTimestamp()
+		expirationDate = creationTime.Add(duration)
+	} else if hasAnnotation && annotationLabel == config.ExpirationDateLabel {
+		var parseTimeErr error
+		expirationDate, parseTimeErr = time.Parse(time.RFC3339, annotationValue)
+		if parseTimeErr != nil {
+			return false, time.Time{}, parseTimeErr
 		}
 	}
 
@@ -58,8 +57,11 @@ func NewResourceInstanceList(apiVersionKind string) *unstructured.UnstructuredLi
 }
 
 func HasMayFlyAnnotation(resource client.Object, config *Config) (bool, string, string) {
-	var annotation string
-	var value string
+	var (
+		annotation string
+		value      string
+	)
+
 	if resource.GetAnnotations()[config.ExpirationLabel] != "" {
 		annotation = config.ExpirationLabel
 		value = resource.GetAnnotations()[config.ExpirationLabel]
@@ -67,5 +69,6 @@ func HasMayFlyAnnotation(resource client.Object, config *Config) (bool, string, 
 		annotation = config.ExpirationDateLabel
 		value = resource.GetAnnotations()[config.ExpirationDateLabel]
 	}
+
 	return value != "", annotation, value
 }

@@ -81,10 +81,12 @@ func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 		WithEventFilter(predicate.Funcs{
 			CreateFunc: func(createEvent event.CreateEvent) bool {
 				hasAnnotation, _, _ := HasMayFlyAnnotation(createEvent.Object, r.Config)
+
 				return hasAnnotation
 			},
 			DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
 				hasAnnotation, _, _ := HasMayFlyAnnotation(deleteEvent.Object, r.Config)
+
 				return hasAnnotation
 			},
 			UpdateFunc: func(updateEvent event.UpdateEvent) bool {
