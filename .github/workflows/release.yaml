@@ -13,7 +13,7 @@ env:
 jobs:
   release:
     name: Release Image
-    runs-on: [self-hosted, docker]
+    runs-on: ubuntu-22.04
     steps:
       - name: Login
         uses: docker/login-action@v2
