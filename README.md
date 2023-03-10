@@ -92,4 +92,4 @@ All functionalities are in beta and is subject to change. The code is provided a
 [Apache 2.0 License](./LICENSE)<br>
 <br><br>
 <img alt="logo" width="75" src="https://avatars.githubusercontent.com/u/7532706" /><br>
-Made with <span style="color: #e25555;">&hearts;</span> by the DevOps team of [Namecheap Cloud](https://github.com/NCCloud)
+Made with <span style="color: #e25555;">&hearts;</span> by [Namecheap Cloud Team](https://github.com/NCCloud)
