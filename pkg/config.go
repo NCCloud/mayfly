@@ -3,7 +3,7 @@ package pkg
 import (
 	"time"
 
-	"github.com/caarlos0/env/v6"
+	"github.com/caarlos0/env/v9"
 )
 
 type Config struct {

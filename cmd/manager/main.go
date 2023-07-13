@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+
 	"github.com/NCCloud/mayfly/pkg"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -24,14 +27,18 @@ func main() {
 	logger.Info("Configuration", "config", config)
 
 	manager, managerErr := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Port:                   port,
 		Scheme:                 scheme,
 		Logger:                 logger,
 		MetricsBindAddress:     fmt.Sprintf(":%d", metricPort),
 		HealthProbeBindAddress: fmt.Sprintf(":%d", healthPort),
-		SyncPeriod:             config.SyncPeriod,
 		LeaderElection:         config.EnableLeaderElection,
 		LeaderElectionID:       "mayfly-leader.cloud.namecheap.com",
+		WebhookServer: webhook.NewServer(webhook.Options{
+			Port: port,
+		}),
+		Cache: cache.Options{
+			SyncPeriod: config.SyncPeriod,
+		},
 	})
 	if managerErr != nil {
 		panic(managerErr)

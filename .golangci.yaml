@@ -13,7 +13,7 @@ issues:
       linters:
         - gochecknoglobals
 run:
-  go: '1.19'
+  go: '1.20'
   tests: false
   skip-dirs:
     - cmd/benchmark
