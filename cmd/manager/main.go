@@ -3,18 +3,15 @@ package main
 import (
 	"fmt"
 
-	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
 	"github.com/NCCloud/mayfly/pkg"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 const (
-	port       = 9443
 	metricPort = 8082
 	healthPort = 8083
 )
@@ -33,9 +30,6 @@ func main() {
 		HealthProbeBindAddress: fmt.Sprintf(":%d", healthPort),
 		LeaderElection:         config.EnableLeaderElection,
 		LeaderElectionID:       "mayfly-leader.cloud.namecheap.com",
-		WebhookServer: webhook.NewServer(webhook.Options{
-			Port: port,
-		}),
 		Cache: cache.Options{
 			SyncPeriod: config.SyncPeriod,
 		},
