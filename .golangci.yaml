@@ -7,6 +7,8 @@ linters:
     - gochecknoinits # Disallows to use init functions
     - ireturn # Disallows to return Interfaces
     - gci # Disable gci import ordering checker since its buggy
+    - depguard # Disallows to use non-listed packages
+    - tagalign # Disallows to use non-aligned tags
 issues:
   exclude-rules:
     - path: .*/metrics.go
