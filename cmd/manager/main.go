@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
+
 	"github.com/NCCloud/mayfly/pkg"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -24,9 +26,11 @@ func main() {
 	logger.Info("Configuration", "config", config)
 
 	manager, managerErr := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                 scheme,
-		Logger:                 logger,
-		MetricsBindAddress:     fmt.Sprintf(":%d", metricPort),
+		Scheme: scheme,
+		Logger: logger,
+		Metrics: server.Options{
+			BindAddress: fmt.Sprintf(":%d", metricPort),
+		},
 		HealthProbeBindAddress: fmt.Sprintf(":%d", healthPort),
 		LeaderElection:         config.EnableLeaderElection,
 		LeaderElectionID:       "mayfly-leader.cloud.namecheap.com",

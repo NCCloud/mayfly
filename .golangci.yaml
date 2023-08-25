@@ -15,7 +15,7 @@ issues:
       linters:
         - gochecknoglobals
 run:
-  go: '1.20'
+  go: '1.21'
   tests: false
   skip-dirs:
     - cmd/benchmark
