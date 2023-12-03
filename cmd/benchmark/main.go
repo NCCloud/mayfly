@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/NCCloud/mayfly/pkg"
+	"github.com/NCCloud/mayfly/pkg/common"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	config        *pkg.Config
+	config        *common.Config
 	mgrClient     client.Client
 	pageTitle     = "Mayfly Benchmark"
 	benchmarkHtml = "mayfly_benchmark.html"
@@ -29,7 +29,7 @@ func init() {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	config = pkg.NewConfig()
+	config = common.NewConfig()
 
 	var mgrClientErr error
 	mgrClient, mgrClientErr = client.New(ctrl.GetConfigOrDie(), client.Options{Scheme: scheme})

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	time "time"
 
-	"github.com/NCCloud/mayfly/pkg"
+	"github.com/NCCloud/mayfly/pkg/common"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,7 +30,7 @@ func (b *Benchmark) Listener() Result {
 		kind := make(map[string]int)
 		now := time.Now()
 		for _, resourceKind := range b.config.Resources {
-			resourceList := pkg.NewResourceInstanceList(resourceKind)
+			resourceList := common.NewResourceInstanceList(resourceKind)
 
 			resourcesListErr := b.mgrClient.List(context.Background(), resourceList)
 			if resourcesListErr != nil {

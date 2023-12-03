@@ -1,0 +1,18 @@
+apiVersion: cloud.spaceship.com/v1alpha1
+kind: ScheduledResource
+metadata:
+  name: example
+  annotations:
+    mayfly.cloud.namecheap.com/expire: 30s
+spec:
+  in: "15s"
+  content: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: example
+      namespace: default
+      annotations:
+        mayfly.cloud.namecheap.com/expire: 15s
+    data:
+      .secret-file: dmFsdWUtMg0KDQo=

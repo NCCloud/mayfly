@@ -1,4 +1,4 @@
-package pkg
+package common
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ func NewResourceInstance(apiVersionKind string) *unstructured.Unstructured {
 	apiVersionKindArr := strings.Split(apiVersionKind, ";")
 
 	return &unstructured.Unstructured{
-		Object: map[string]interface{}{
+		Object: map[string]any{
 			"apiVersion": apiVersionKindArr[0],
 			"kind":       apiVersionKindArr[1],
 		},
@@ -41,7 +41,7 @@ func NewResourceInstanceList(apiVersionKind string) *unstructured.UnstructuredLi
 	resourceInstance := NewResourceInstance(apiVersionKind)
 
 	return &unstructured.UnstructuredList{
-		Object: map[string]interface{}{
+		Object: map[string]any{
 			"apiVersion": resourceInstance.GetAPIVersion(),
 			"kind":       fmt.Sprintf("%sList", resourceInstance.GetKind()),
 		},

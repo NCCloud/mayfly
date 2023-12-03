@@ -9,6 +9,9 @@ linters:
     - gci # Disable gci import ordering checker since its buggy
     - depguard # Disallows to use non-listed packages
     - tagalign # Disallows to use non-aligned tags
+linters-settings:
+  funlen:
+    lines: 90
 issues:
   exclude-rules:
     - path: .*/metrics.go
@@ -19,3 +22,9 @@ run:
   tests: false
   skip-dirs:
     - cmd/benchmark
+  skip-files:
+    - cmd/.*.go
+    - mocks/.*.go
+    - common/config.go
+    - .*/groupversion_info.go
+    - .*/zz_generated.deepcopy.go

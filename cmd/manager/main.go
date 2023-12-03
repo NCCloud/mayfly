@@ -3,9 +3,14 @@ package main
 import (
 	"fmt"
 
+	"github.com/NCCloud/mayfly/pkg/apis/v1alpha1"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+
+	"github.com/NCCloud/mayfly/pkg/common"
+	"github.com/NCCloud/mayfly/pkg/controllers"
+
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	"github.com/NCCloud/mayfly/pkg"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -21,7 +26,10 @@ const (
 func main() {
 	logger := zap.New()
 	scheme := runtime.NewScheme()
-	config := pkg.NewConfig()
+	config := common.NewConfig()
+
+	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+	ctrl.SetLogger(logger)
 
 	logger.Info("Configuration", "config", config)
 
@@ -43,12 +51,18 @@ func main() {
 	}
 
 	client := manager.GetClient()
-	scheduler := pkg.NewScheduler(config, client)
+	scheduler := common.NewScheduler(config, client)
 
 	for _, resource := range config.Resources {
-		if err := pkg.NewController(config, client, resource, scheduler).SetupWithManager(manager); err != nil {
-			panic(err)
+		if expirationControllerErr := controllers.NewExpirationController(config, client, resource, scheduler).
+			SetupWithManager(manager); expirationControllerErr != nil {
+			panic(expirationControllerErr)
 		}
+	}
+
+	if scheduledResourceControllerErr := controllers.NewScheduledResourceController(config, client, scheduler).
+		SetupWithManager(manager); scheduledResourceControllerErr != nil {
+		panic(scheduledResourceControllerErr)
 	}
 
 	if addHealthCheckErr := manager.AddHealthzCheck("healthz", healthz.Ping); addHealthCheckErr != nil {
