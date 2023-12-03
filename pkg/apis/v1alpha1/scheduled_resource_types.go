@@ -14,7 +14,7 @@ type (
 )
 
 const (
-	ConditionCreated   Condition = "Applied"
+	ConditionCreated   Condition = "Created"
 	ConditionScheduled Condition = "Scheduled"
 	ConditionFailed    Condition = "Failed"
 )

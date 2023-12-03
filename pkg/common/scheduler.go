@@ -83,7 +83,6 @@ func (s *Scheduler) RemoveExpirationJob(resource client.Object) error {
 
 func (s *Scheduler) startMonitoring() {
 	if _, doErr := s.scheduler.Every(MonitoringInterval).Do(func() {
-		fmt.Printf("\n\n\nJob Count: %d\n\n\n", len(s.scheduler.Jobs()))
 		exportMayflyTotalJobsMetrics(float64(len(s.scheduler.Jobs())))
 
 		pastJobs := 0
