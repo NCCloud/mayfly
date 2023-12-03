@@ -1,4 +1,4 @@
-apiVersion: cloud.spaceship.com/v1alpha1
+apiVersion: cloud.namecheap.com/v1alpha1
 kind: ScheduledResource
 metadata:
   name: example

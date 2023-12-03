@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
-  name: scheduledresources.cloud.spaceship.com
+  name: scheduledresources.cloud.namecheap.com
 spec:
-  group: cloud.spaceship.com
+  group: cloud.namecheap.com
   names:
     kind: ScheduledResource
     listKind: ScheduledResourceList
