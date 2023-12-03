@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	errors2 "errors"
+	"fmt"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -75,7 +76,7 @@ func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Re
 				return errors2.Join(createErr, r.client.Status().Update(context.Background(), &resource))
 			}
 
-			logger.Info("%s/%s applied", resource.Name, resource.Namespace)
+			logger.Info(fmt.Sprintf("%s/%s created", resource.Name, resource.Namespace))
 
 			if removeErr := r.scheduler.RemoveCreationJob(&resource); removeErr != nil {
 				return removeErr
