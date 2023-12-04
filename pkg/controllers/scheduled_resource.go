@@ -40,7 +40,7 @@ func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Re
 
 	if getErr := r.client.Get(ctx, req.NamespacedName, scheduledResource); getErr != nil {
 		if errors.IsNotFound(getErr) {
-			_ = r.scheduler.RemoveCreationJob(scheduledResource)
+			_ = r.scheduler.DeleteCreationJob(scheduledResource)
 		}
 
 		return ctrl.Result{}, client.IgnoreNotFound(getErr)
@@ -76,9 +76,9 @@ func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Re
 				return errors2.Join(createErr, r.client.Status().Update(context.Background(), &resource))
 			}
 
-			logger.Info(fmt.Sprintf("%s/%s created", resource.Name, resource.Namespace))
+			logger.Info(fmt.Sprintf("%s/%s created.", resource.Name, resource.Namespace))
 
-			if removeErr := r.scheduler.RemoveCreationJob(&resource); removeErr != nil {
+			if removeErr := r.scheduler.DeleteCreationJob(&resource); removeErr != nil {
 				return removeErr
 			}
 

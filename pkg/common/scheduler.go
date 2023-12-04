@@ -10,8 +10,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const MonitoringInterval = "5s"
-
 type Scheduler struct {
 	config    *Config
 	client    client.Client
@@ -52,10 +50,10 @@ func (s *Scheduler) CreateOrUpdateCreationJob(date time.Time,
 	return jobErr
 }
 
-func (s *Scheduler) CreateOrUpdateExpirationJob(date time.Time,
+func (s *Scheduler) CreateOrUpdateDeletionJob(date time.Time,
 	task func(resource client.Object) error, resource client.Object,
 ) error {
-	tag := fmt.Sprintf("%v-expire", resource.GetUID())
+	tag := fmt.Sprintf("%v-delete", resource.GetUID())
 
 	if jobs, _ := s.scheduler.FindJobsByTag(tag); len(jobs) > 0 {
 		if jobs[0].NextRun().Equal(date) {
@@ -73,16 +71,16 @@ func (s *Scheduler) CreateOrUpdateExpirationJob(date time.Time,
 	return jobErr
 }
 
-func (s *Scheduler) RemoveCreationJob(resource client.Object) error {
+func (s *Scheduler) DeleteCreationJob(resource client.Object) error {
 	return s.scheduler.RemoveByTag(fmt.Sprintf("%v-create", resource.GetUID()))
 }
 
-func (s *Scheduler) RemoveExpirationJob(resource client.Object) error {
-	return s.scheduler.RemoveByTag(fmt.Sprintf("%v-expire", resource.GetUID()))
+func (s *Scheduler) DeleteDeletionJob(resource client.Object) error {
+	return s.scheduler.RemoveByTag(fmt.Sprintf("%v-delete", resource.GetUID()))
 }
 
 func (s *Scheduler) startMonitoring() {
-	if _, doErr := s.scheduler.Every(MonitoringInterval).Do(func() {
+	if _, doErr := s.scheduler.SingletonMode().Every(s.config.MonitoringInterval).Do(func() {
 		exportMayflyTotalJobsMetrics(float64(len(s.scheduler.Jobs())))
 
 		pastJobs := 0
@@ -91,6 +89,7 @@ func (s *Scheduler) startMonitoring() {
 				pastJobs++
 			}
 		}
+
 		exportMayflyPastJobsMetrics(float64(pastJobs))
 	}); doErr != nil {
 		panic(doErr)

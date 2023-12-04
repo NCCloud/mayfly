@@ -41,7 +41,7 @@ func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	if getErr := r.client.Get(ctx, req.NamespacedName, resource); getErr != nil {
 		if errors.IsNotFound(getErr) {
-			_ = r.scheduler.RemoveExpirationJob(resource)
+			_ = r.scheduler.DeleteDeletionJob(resource)
 		}
 
 		return ctrl.Result{}, client.IgnoreNotFound(getErr)
@@ -58,12 +58,12 @@ func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) 
 		logger.Info("Resource already expired. Removing")
 
 		_ = r.client.Delete(ctx, resource)
-		_ = r.scheduler.RemoveExpirationJob(resource)
+		_ = r.scheduler.DeleteDeletionJob(resource)
 
 		return ctrl.Result{}, nil
 	}
 
-	if createOrUpdateErr := r.scheduler.CreateOrUpdateExpirationJob(expirationDate,
+	if createOrUpdateErr := r.scheduler.CreateOrUpdateDeletionJob(expirationDate,
 		func(resource client.Object) error {
 			return r.client.Delete(context.Background(), resource)
 		}, resource); createOrUpdateErr != nil {
