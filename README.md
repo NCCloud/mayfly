@@ -23,6 +23,9 @@ export RESOURCES="v1;Secret,test.com/v1alpha;MyCRD"
 ```
 
 ## 🚀 Usage
+
+### Resouce Expiration
+
 Once you have determined which resources you want Mayfly to monitor, you can set the `mayfly.cloud.namecheap.com/expire` annotation on those resources with a duration value. This will cause Mayfly to delete the resources once the specified duration has passed, based on the time of their creation.
 Keep in mind that the expiration will be calculated based on the creation time of the resource.
 
@@ -43,6 +46,35 @@ spec:
         - infinity
 ```
 
+### Scheduled Resource Creation
+
+The ScheduledResource CRD allows you to schedule the creation of an object in the future. This can be combined with the expire annotation, enabling Mayfly to create and remove certain objects for a temporary period in the future.
+
+Example:
+```
+apiVersion: cloud.namecheap.com/v1alpha1
+kind: ScheduledResource
+metadata:
+  annotations:
+    mayfly.cloud.namecheap.com/expire: 60m
+  name: example
+  namespace: default
+spec:
+  in: 30m
+  content: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: example
+      namespace: default
+      annotations:
+        mayfly.cloud.namecheap.com/expire: 30m
+    data:
+      .secret-file: dmFsdWUtMg0KDQo=
+status:
+  condition: Scheduled
+```
+This feature is particularly useful for setting up temporary resources that are only needed for a short period, reducing clutter and improving the efficiency of resource management.
 
 ## 🛳️ Deployment
 
