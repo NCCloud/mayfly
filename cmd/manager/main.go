@@ -43,7 +43,7 @@ func main() {
 		LeaderElection:         config.EnableLeaderElection,
 		LeaderElectionID:       "mayfly-leader.cloud.namecheap.com",
 		Cache: cache.Options{
-			SyncPeriod: config.SyncPeriod,
+			SyncPeriod: &config.SyncPeriod,
 		},
 	})
 	if managerErr != nil {

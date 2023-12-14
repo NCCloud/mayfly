@@ -30,7 +30,7 @@ func NewScheduler(config *Config, client client.Client) *Scheduler {
 }
 
 func (s *Scheduler) CreateOrUpdateCreationJob(date time.Time,
-	task func(resource v1alpha1.ScheduledResource) error, resource v1alpha1.ScheduledResource,
+	task func(resource v1alpha1.ScheduledResource) error, resource client.Object,
 ) error {
 	tag := fmt.Sprintf("%v-create", resource.GetUID())
 
