@@ -58,7 +58,7 @@ func (in *ScheduledResource) IsBeingDeleted() bool {
 	return in.DeletionTimestamp != nil
 }
 
-func (in *ScheduledResource) ToUnstructured() (*unstructured.Unstructured, error) {
+func (in *ScheduledResource) GetContent() (*unstructured.Unstructured, error) {
 	object, _, decodeErr := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).
 		Decode([]byte(in.Spec.Content), nil, nil)
 	if decodeErr != nil {

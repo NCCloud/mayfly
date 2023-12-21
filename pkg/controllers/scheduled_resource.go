@@ -36,17 +36,19 @@ func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Re
 	var (
 		logger            = log.FromContext(ctx)
 		scheduledResource = &v1alpha1.ScheduledResource{}
+		tag               = fmt.Sprintf("%s-%s/delete", req.Name, req.Namespace)
 	)
+
+	logger.Info("Reconciliation started.")
+	defer logger.Info("Reconciliation finished.")
 
 	if getErr := r.client.Get(ctx, req.NamespacedName, scheduledResource); getErr != nil {
 		if errors.IsNotFound(getErr) {
-			_ = r.scheduler.DeleteCreationJob(scheduledResource)
+			_ = r.scheduler.DeleteTask(tag)
 		}
 
 		return ctrl.Result{}, client.IgnoreNotFound(getErr)
 	}
-
-	logger.Info("Reconciliation started.")
 
 	if scheduledResource.Status.Condition == v1alpha1.ConditionCreated {
 		return ctrl.Result{}, nil
@@ -54,42 +56,48 @@ func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Re
 
 	duration, parseDurationErr := time.ParseDuration(scheduledResource.Spec.In)
 	if parseDurationErr != nil {
+		logger.Error(parseDurationErr, "Error while parsing duration.")
+
 		return ctrl.Result{}, parseDurationErr
 	}
 
-	if createOrUpdateErr := r.scheduler.CreateOrUpdateCreationJob(scheduledResource.CreationTimestamp.Add(duration),
-		func(resource v1alpha1.ScheduledResource) error {
-			unstructured, toUnstructuredErr := resource.ToUnstructured()
-			if toUnstructuredErr != nil {
-				return toUnstructuredErr
+	if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, scheduledResource.CreationTimestamp.Add(duration),
+		func() error {
+			content, contentErr := scheduledResource.GetContent()
+			if contentErr != nil {
+				logger.Error(contentErr, "Error while parsing content.")
+
+				return contentErr
 			}
 
-			if getErr := r.client.Get(context.Background(),
-				client.ObjectKeyFromObject(&resource), &resource); getErr != nil {
+			if getErr := r.client.Get(context.Background(), client.
+				ObjectKeyFromObject(scheduledResource), scheduledResource); client.IgnoreNotFound(getErr) != nil {
+				logger.Error(contentErr, "Error while getting resource.")
+
 				return getErr
 			}
 
 			if createErr := r.client.Create(context.Background(),
-				unstructured); client.IgnoreAlreadyExists(createErr) != nil {
-				resource.Status.Condition = v1alpha1.ConditionFailed
+				content); client.IgnoreAlreadyExists(createErr) != nil {
+				logger.Error(contentErr, "An error occurred while creating resource.")
 
-				return errors2.Join(createErr, r.client.Status().Update(context.Background(), &resource))
+				scheduledResource.Status.Condition = v1alpha1.ConditionFailed
+
+				return errors2.Join(createErr, r.client.Status().Update(context.Background(), scheduledResource))
 			}
 
-			logger.Info(fmt.Sprintf("%s/%s created.", resource.Name, resource.Namespace))
+			logger.Info(fmt.Sprintf("%s created.", tag))
 
-			if removeErr := r.scheduler.DeleteCreationJob(&resource); removeErr != nil {
-				return removeErr
-			}
+			_ = r.scheduler.DeleteTask(tag)
 
-			resource.Status.Condition = v1alpha1.ConditionCreated
+			scheduledResource.Status.Condition = v1alpha1.ConditionCreated
 
-			return r.client.Status().Update(context.Background(), &resource)
-		}, *scheduledResource); createOrUpdateErr != nil {
-		return ctrl.Result{}, createOrUpdateErr
+			return r.client.Status().Update(context.Background(), scheduledResource)
+		}); createOrUpdateTaskErr != nil {
+		logger.Error(createOrUpdateTaskErr, "Error while creating or updating task.")
+
+		return ctrl.Result{}, createOrUpdateTaskErr
 	}
-
-	logger.Info("Reconciliation finished.")
 
 	scheduledResource.Status.Condition = v1alpha1.ConditionScheduled
 

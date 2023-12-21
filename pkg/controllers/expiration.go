@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/NCCloud/mayfly/pkg/common"
 
@@ -35,13 +36,15 @@ func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) 
 	var (
 		logger   = log.FromContext(ctx)
 		resource = common.NewResourceInstance(r.apiVersionKind)
+		tag      = fmt.Sprintf("%s-%s/delete", req.Name, req.Namespace)
 	)
 
 	logger.Info("Reconciliation started.")
+	defer logger.Info("Reconciliation finished.")
 
 	if getErr := r.client.Get(ctx, req.NamespacedName, resource); getErr != nil {
 		if errors.IsNotFound(getErr) {
-			_ = r.scheduler.DeleteDeletionJob(resource)
+			_ = r.scheduler.DeleteTask(tag)
 		}
 
 		return ctrl.Result{}, client.IgnoreNotFound(getErr)
@@ -55,21 +58,19 @@ func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	if hasExpired {
-		logger.Info("Resource already expired. Removing")
+		logger.Info("Resource already expired will be removed.")
 
-		_ = r.client.Delete(ctx, resource)
-		_ = r.scheduler.DeleteDeletionJob(resource)
+		_ = r.scheduler.DeleteTask(tag)
 
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, client.IgnoreNotFound(r.client.Delete(ctx, resource))
 	}
 
-	if createOrUpdateErr := r.scheduler.CreateOrUpdateDeletionJob(expirationDate,
-		func(resource client.Object) error {
-			return r.client.Delete(context.Background(), resource)
-		}, resource); createOrUpdateErr != nil {
-		logger.Error(createOrUpdateErr, "Error while starting job.")
+	if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, expirationDate, func() error {
+		return r.client.Delete(context.Background(), resource)
+	}); createOrUpdateTaskErr != nil {
+		logger.Error(createOrUpdateTaskErr, "Error while creating or updating task.")
 
-		return ctrl.Result{}, createOrUpdateErr
+		return ctrl.Result{}, createOrUpdateTaskErr
 	}
 
 	return ctrl.Result{}, nil
