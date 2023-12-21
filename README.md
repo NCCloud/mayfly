@@ -3,19 +3,19 @@
   <img alt="logo" width="600"  src="https://abload.de/img/mayfly-logo-darkt9eye.png">
 </picture>
 
-> Mayfly is a Kubernetes operator that enables you to create temporary resources on the cluster that will expire after a certain period of time.
+> Mayfly is a Kubernetes operator that enables you to have time-based resources. They creates or deletes on the specified time.
 
 ## 📖 General Information
 
 ### 📄 Summary
 
-The Mayfly Operator allows you to have your resources on your cluster for a temporary time.
-It deletes those resources from the cluster, according to the Mayfly expiration annotation that you set to specify how long the resource should remain active. This can be used to create temporary resources, temporary accesses, or simply to keep your cluster organized and tidy.
+The Mayfly Operator allows you to expire the resources on your cluster by the given expiration or mayfly create the resources at the time you specified.
+It deletes those resources from the cluster, according to the Mayfly expiration annotation that you set to specify how long the resource should remain active. This can be used to create temporary resources, temporary accesses, or simply to keep your cluster organized and tidy. Also, It creates the resources you specific at the given time by creating `ScheduleResource` custom resource definitions. You can also merge these two features together, just to have some resource created in the future and only for a specific amount of time.   
 
 ### 🛠 Configuration
 
 Mayfly is an easy-to-use and configurable project that uses resource watches and schedulers to delete your resources at the appropriate time. It is simple to set up and customize.
-To specify which resources should be monitored and cleaned up, you can set the `RESOURCES` environment variable to a comma-separated list of `{ApiVersion};{Kind}` as text. This allows you to customize which resources are targeted for cleanup.
+To specify which resources should be monitored and cleaned up, you can set the `RESOURCES` environment variable to a comma-separated list of `{ApiVersion};{Kind}` as text. This allows you to customize which resources are targeted for cleanup with expiration annotations.
 
 Example:
 ```
@@ -48,7 +48,7 @@ spec:
 
 ### Scheduled Resource Creation
 
-The ScheduledResource CRD allows you to schedule the creation of an object in the future. This can be combined with the expire annotation, enabling Mayfly to create and remove certain objects for a temporary period in the future.
+The `ScheduledResource` CRD allows you to schedule the creation of an object in the future. This can be combined with the expire annotation, enabling Mayfly to create and remove certain objects for a temporary period in the future.
 
 Example:
 ```
