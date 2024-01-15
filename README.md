@@ -84,7 +84,7 @@ The easiest and most recommended way to deploy the Mayfly operator to your Kuber
 Example:
 ```
 helm repo add nccloud https://nccloud.github.io/charts
-helm install mayfly nccloud/mayfly --set RESOURCES="v1;Secret" #For only secrets
+helm install mayfly nccloud/mayfly --set "env[0].name=RESOURCES" --set "env[0].value=v1;Secret" #For only secrets
 ```
 
 ## 🛠 Development
