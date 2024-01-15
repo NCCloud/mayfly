@@ -34,9 +34,10 @@ func NewExpirationController(config *common.Config, client client.Client,
 
 func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var (
-		logger   = log.FromContext(ctx)
-		resource = common.NewResourceInstance(r.apiVersionKind)
-		tag      = fmt.Sprintf("%s-%s/delete", req.Name, req.Namespace)
+		logger           = log.FromContext(ctx)
+		resource         = common.NewResourceInstance(r.apiVersionKind)
+		apiVersion, kind = resource.GroupVersionKind().ToAPIVersionAndKind()
+		tag              = fmt.Sprintf("%s/%s/%s/%s/delete", apiVersion, kind, req.Name, req.Namespace)
 	)
 
 	logger.Info("Reconciliation started.")

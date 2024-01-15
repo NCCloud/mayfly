@@ -27,15 +27,16 @@ func init() {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="In",type=date,JSONPath=".spec.in"
+//+kubebuilder:printcolumn:name="In",type=string,JSONPath=".spec.in"
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
+//+kubebuilder:printcolumn:name="Condition",type=string,JSONPath=".status.condition"
 
 type ScheduledResource struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ScheduledSpec   `json:"spec,omitempty"`
-	Status ScheduledStatus `json:"status,omitempty"`
+	Spec   ScheduledResourceSpec   `json:"spec,omitempty"`
+	Status ScheduledResourceStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -46,12 +47,12 @@ type ScheduledResourceList struct {
 	Items           []ScheduledResource `json:"items"`
 }
 
-type ScheduledSpec struct {
+type ScheduledResourceSpec struct {
 	In      string `json:"in"`
 	Content string `json:"content"`
 }
 
-type ScheduledStatus struct {
+type ScheduledResourceStatus struct {
 	Condition Condition `json:"condition"`
 }
 

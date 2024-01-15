@@ -36,8 +36,10 @@ func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Re
 	var (
 		logger            = log.FromContext(ctx)
 		scheduledResource = &v1alpha1.ScheduledResource{}
-		tag               = fmt.Sprintf("%s-%s/delete", req.Name, req.Namespace)
+		tag               = fmt.Sprintf("v1alpha1/ScheduledResource/%s/%s/create", req.Name, req.Namespace)
 	)
+
+	scheduledResource.GroupVersionKind().ToAPIVersionAndKind()
 
 	logger.Info("Reconciliation started.")
 	defer logger.Info("Reconciliation finished.")
