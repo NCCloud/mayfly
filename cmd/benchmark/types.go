@@ -3,14 +3,14 @@ package main
 import (
 	"time"
 
-	"github.com/NCCloud/mayfly/pkg"
+	"github.com/NCCloud/mayfly/pkg/common"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Benchmark struct {
 	granularity time.Duration
-	config      *pkg.Config
+	config      *common.Config
 	mgrClient   client.Client
 	startedAt   time.Time
 	count       int
@@ -29,7 +29,7 @@ type Point struct {
 	time time.Time
 }
 
-func NewBenchmark(mgrClient client.Client, config *pkg.Config, count int) *Benchmark {
+func NewBenchmark(mgrClient client.Client, config *common.Config, count int) *Benchmark {
 	return &Benchmark{
 		granularity: 5 * time.Second,
 		config:      config,

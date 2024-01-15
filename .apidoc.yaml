@@ -1,0 +1,6 @@
+processor:
+  ignoreTypes:
+    - "(.*)List$"
+    - "TypeMeta"
+render:
+  kubernetesVersion: 1.25

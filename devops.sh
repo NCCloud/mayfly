@@ -1,13 +1,29 @@
 #!/usr/bin/env bash
 
+export CONTROLLER_GEN_VERSION="v0.13.0"
 export GOLANGCI_LINT_VERSION="v1.54.2"
+export MOCKERY_GEN_VERSION="v2.36.0"
+export GOFUMPT_VERSION="v0.5.0"
+export TESTENV_VERSION="1.25.x!"
 
 prerequisites() {
-  if ! command -v golangci-lint &>/dev/null; then
+  if [[ "$(controller-gen --version 2>&1)" != *"$CONTROLLER_GEN_VERSION"* ]]; then
+    go install sigs.k8s.io/controller-tools/cmd/controller-gen@"${CONTROLLER_GEN_VERSION}"
+  fi
+  if [[ "$(golangci-lint --version 2>&1)" != *"$GOLANGCI_LINT_VERSION"* ]]; then
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@"${GOLANGCI_LINT_VERSION}"
   fi
-  if ! command -v gofumpt &>/dev/null; then
-    go install mvdan.cc/gofumpt@latest
+  if [[ "$(mockery --version 2>&1)" != *"$MOCKERY_GEN_VERSION"* ]]; then
+    go install github.com/vektra/mockery/v2@"${MOCKERY_GEN_VERSION}"
+  fi
+  if [[ "$(gofumpt --version 2>&1)" != *"$GOFUMPT_VERSION"* ]]; then
+     go install mvdan.cc/gofumpt@"${GOFUMPT_VERSION}"
+  fi
+  if ! command -v crd-ref-docs &>/dev/null; then
+    go install github.com/elastic/crd-ref-docs@latest
+  fi
+  if ! command -v setup-envtest &>/dev/null; then
+    go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
   fi
 }
 
@@ -16,8 +32,21 @@ lint() {
   golangci-lint run --timeout=10m
 }
 
+generate() {
+  rm -rf deploy/crds
+  controller-gen object paths="./..."
+  controller-gen crd paths="./..." output:dir=deploy/crds
+  sed '/Compiled/d' pkg/apis/v1alpha1/zz_generated.deepcopy.go > pkg/apis/v1alpha1/zz_generated.deepcopy.gotmp
+  mv pkg/apis/v1alpha1/zz_generated.deepcopy.gotmp pkg/apis/v1alpha1/zz_generated.deepcopy.go
+  crd-ref-docs --source-path=./pkg/apis --config .apidoc.yaml --renderer markdown --output-path=./docs/api.md
+}
+
+install() {
+  kubectl apply -f deploy/crds
+}
+
 test() {
-  go test -v ./...
+  go test -v -coverpkg=./... ./...
 }
 
 prerequisites

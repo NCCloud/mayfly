@@ -1,10 +1,9 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: website-1-temp
+  name: expiration-example
   namespace: default
   annotations:
     mayfly.cloud.namecheap.com/expire: 10s
 data:
-  mysql-user-password: cUIzN3Y5cmo4bmN5TmI2NVVWMDQxMktZ
-type: Opaque
+  .secret-file: dmFsdWUtMg0KDQo=

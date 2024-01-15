@@ -1,0 +1,14 @@
+apiVersion: cloud.namecheap.com/v1alpha1
+kind: ScheduledResource
+metadata:
+  name: scheduled-resource-example
+spec:
+  in: "5s"
+  content: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: scheduled-resource-example
+      namespace: default
+    data:
+      .secret-file: dmFsdWUtMg0KDQo=
