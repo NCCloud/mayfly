@@ -4,14 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
-
-	"github.com/araddon/dateparse"
-	"github.com/go-co-op/gocron/v2"
-	errors2 "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/NCCloud/mayfly/pkg/common"
+	"github.com/go-co-op/gocron/v2"
+	errors2 "k8s.io/apimachinery/pkg/api/errors"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -57,12 +53,12 @@ func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, r.scheduler.DeleteTask(tag)
 	}
 
-	expiration, expirationErr := r.ResolveExpiration(resource.GetCreationTimestamp(), annotation)
-	if expirationErr != nil {
-		return ctrl.Result{}, expirationErr
+	schedule, scheduleErr := common.ResolveSchedule(resource.GetCreationTimestamp(), annotation)
+	if scheduleErr != nil {
+		return ctrl.Result{}, scheduleErr
 	}
 
-	createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, expiration, func() error {
+	createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, schedule, func() error {
 		logger.Info("Deleted")
 
 		return client.IgnoreNotFound(r.client.Delete(ctx, resource))
@@ -77,20 +73,6 @@ func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) 
 	logger.Info("Scheduled")
 
 	return ctrl.Result{}, createOrUpdateTaskErr
-}
-
-func (r *ExpirationController) ResolveExpiration(creationTimestamp metav1.Time, expiration string) (time.Time, error) {
-	duration, parseDurationErr := time.ParseDuration(expiration)
-	if parseDurationErr == nil {
-		return creationTimestamp.Add(duration), nil
-	}
-
-	date, parseDateErr := dateparse.ParseAny(expiration)
-	if parseDateErr == nil {
-		return date, nil
-	}
-
-	return time.Time{}, errors.Join(parseDurationErr, parseDateErr)
 }
 
 func (r *ExpirationController) SetupWithManager(mgr ctrl.Manager) error {
