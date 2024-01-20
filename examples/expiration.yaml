@@ -4,6 +4,6 @@ metadata:
   name: expiration-example
   namespace: default
   annotations:
-    mayfly.cloud.namecheap.com/expire: "19 Jan 2024, 14:13"
+    mayfly.cloud.namecheap.com/expire: "50s"
 data:
   .secret-file: dmFsdWUtMg0KDQo=

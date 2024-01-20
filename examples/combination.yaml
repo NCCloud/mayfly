@@ -3,7 +3,7 @@ kind: ScheduledResource
 metadata:
   name: combination-example
   annotations:
-    mayfly.cloud.spacehip.com/expire: 10s
+    mayfly.cloud.namecheap.com/expire: 10s
 spec:
   in: "5s"
   content: |
@@ -13,6 +13,6 @@ spec:
       name: combination-example
       namespace: default
       annotations:
-        mayfly.cloud.spaceship.com/expire: 10s
+        mayfly.cloud.namecheap.com/expire: 10s
     data:
       .secret-file: dmFsdWUtMg0KDQo=
