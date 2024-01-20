@@ -1,65 +1,66 @@
 package common
 
 import (
+	"slices"
 	"time"
 
-	"github.com/go-co-op/gocron"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/elliotchance/pie/v2"
+	"github.com/go-co-op/gocron/v2"
 )
 
 type Scheduler struct {
 	config    *Config
-	client    client.Client
-	scheduler *gocron.Scheduler
+	scheduler gocron.Scheduler
 }
 
-func NewScheduler(config *Config, client client.Client) *Scheduler {
-	scheduler := &Scheduler{
-		config:    config,
-		client:    client,
-		scheduler: gocron.NewScheduler(time.UTC),
+func NewScheduler(config *Config) *Scheduler {
+	schedulerInstance := &Scheduler{
+		config: config,
 	}
 
-	scheduler.startMonitoring()
-	scheduler.scheduler.StartAsync()
+	scheduler, newSchedulerErr := gocron.NewScheduler()
+	if newSchedulerErr != nil {
+		panic(newSchedulerErr)
+	}
 
-	return scheduler
+	if _, newJobErr := scheduler.NewJob(gocron.DurationJob(config.MonitoringInterval), gocron.NewTask(func() {
+		mayflyTotalJobs.Set(float64(len(scheduler.Jobs())) - 1)
+	}), gocron.WithTags("monitoring")); newJobErr != nil {
+		panic(newJobErr)
+	}
+
+	schedulerInstance.scheduler = scheduler
+	scheduler.Start()
+
+	return schedulerInstance
 }
 
 func (s *Scheduler) CreateOrUpdateTask(tag string, date time.Time, task func() error) error {
-	if jobs, _ := s.scheduler.FindJobsByTag(tag); len(jobs) > 0 {
-		if jobs[0].NextRun().Equal(date) {
-			return nil
-		}
+	job := pie.Of(s.scheduler.Jobs()).Filter(func(job gocron.Job) bool {
+		return slices.Contains(job.Tags(), tag)
+	}).First()
 
-		if removeJobErr := s.scheduler.RemoveByTag(tag); removeJobErr != nil {
-			return removeJobErr
-		}
+	if job != nil {
+		_, updateErr := s.scheduler.Update(job.ID(), gocron.OneTimeJob(
+			gocron.OneTimeJobStartDateTime(date)), gocron.NewTask(task), gocron.WithTags(tag))
+
+		return updateErr
 	}
 
-	_, jobErr := s.scheduler.StartAt(date).Every(1).LimitRunsTo(1).Tag(tag).Do(task)
+	_, jobErr := s.scheduler.NewJob(gocron.OneTimeJob(
+		gocron.OneTimeJobStartDateTime(date)), gocron.NewTask(task), gocron.WithTags(tag))
 
 	return jobErr
 }
 
 func (s *Scheduler) DeleteTask(tag string) error {
-	return s.scheduler.RemoveByTag(tag)
-}
+	job := pie.Of(s.scheduler.Jobs()).Filter(func(job gocron.Job) bool {
+		return slices.Contains(job.Tags(), tag)
+	}).First()
 
-func (s *Scheduler) startMonitoring() {
-	if _, doErr := s.scheduler.SingletonMode().Every(s.config.MonitoringInterval).Do(func() {
-		exportMayflyTotalJobsMetrics(float64(len(s.scheduler.Jobs())))
-
-		pastJobs := 0
-		for _, job := range s.scheduler.Jobs() {
-			if job.NextRun().Before(time.Now()) {
-				pastJobs++
-			}
-		}
-
-		exportMayflyPastJobsMetrics(float64(pastJobs))
-	}); doErr != nil {
-		panic(doErr)
+	if job != nil {
+		return s.scheduler.RemoveJob(job.ID())
 	}
+
+	return nil
 }
