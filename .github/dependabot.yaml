@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      day: friday
+      time: 12:00
+      interval: weekly
+      timezone: Europe/Rome
+    reviewers:
+      - "yunussandikci"
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      day: friday
+      time: 12:00
+      interval: weekly
+      timezone: Europe/Rome
+    reviewers:
+      - "yunussandikci"
