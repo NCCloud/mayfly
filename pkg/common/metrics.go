@@ -7,26 +7,11 @@ import (
 
 var mayflyTotalJobs = prometheus.NewGauge(
 	prometheus.GaugeOpts{
-		Name: "mayfly_jobs",
+		Name: "mayfly_total_jobs",
 		Help: "Number of scheduled Mayfly Jobs",
 	},
 )
 
-var mayflyPastJobs = prometheus.NewGauge(
-	prometheus.GaugeOpts{
-		Name: "mayfly_jobs_past_jobs",
-		Help: "Number of past Mayfly Jobs",
-	},
-)
-
 func init() {
-	metrics.Registry.MustRegister(mayflyTotalJobs, mayflyPastJobs)
-}
-
-func exportMayflyTotalJobsMetrics(jobs float64) {
-	mayflyTotalJobs.Set(jobs)
-}
-
-func exportMayflyPastJobsMetrics(jobs float64) {
-	mayflyPastJobs.Set(jobs)
+	metrics.Registry.MustRegister(mayflyTotalJobs)
 }

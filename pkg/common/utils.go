@@ -1,29 +1,29 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"github.com/araddon/dateparse"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func IsExpired(resource client.Object, config *Config) (bool, time.Time, error) {
-	duration, parseDurationErr := time.ParseDuration(resource.GetAnnotations()[config.ExpirationLabel])
-	if parseDurationErr != nil {
-		return false, time.Time{}, parseDurationErr
+func ResolveSchedule(creationTimestamp metav1.Time, dateTimeDuration string) (time.Time, error) {
+	duration, parseDurationErr := time.ParseDuration(dateTimeDuration)
+	if parseDurationErr == nil {
+		return creationTimestamp.Add(duration), nil
 	}
 
-	creationTime := resource.GetCreationTimestamp()
-	expirationDate := creationTime.Add(duration)
-
-	if expirationDate.Before(time.Now()) {
-		return true, expirationDate, nil
+	date, parseDateErr := dateparse.ParseAny(dateTimeDuration)
+	if parseDateErr == nil {
+		return date, nil
 	}
 
-	return false, expirationDate, nil
+	return time.Time{}, errors.Join(parseDurationErr, parseDateErr)
 }
 
 func NewResourceInstance(apiVersionKind string) *unstructured.Unstructured {

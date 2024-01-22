@@ -51,7 +51,7 @@ func main() {
 	}
 
 	client := manager.GetClient()
-	scheduler := common.NewScheduler(config, client)
+	scheduler := common.NewScheduler(config)
 
 	for _, resource := range config.Resources {
 		if expirationControllerErr := controllers.NewExpirationController(config, client, resource, scheduler).

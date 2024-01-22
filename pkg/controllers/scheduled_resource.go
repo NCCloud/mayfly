@@ -4,7 +4,6 @@ import (
 	"context"
 	errors2 "errors"
 	"fmt"
-	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
@@ -39,8 +38,6 @@ func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Re
 		tag               = fmt.Sprintf("v1alpha1/ScheduledResource/%s/%s/create", req.Name, req.Namespace)
 	)
 
-	scheduledResource.GroupVersionKind().ToAPIVersionAndKind()
-
 	logger.Info("Reconciliation started.")
 	defer logger.Info("Reconciliation finished.")
 
@@ -56,46 +53,43 @@ func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Re
 		return ctrl.Result{}, nil
 	}
 
-	duration, parseDurationErr := time.ParseDuration(scheduledResource.Spec.In)
-	if parseDurationErr != nil {
-		logger.Error(parseDurationErr, "Error while parsing duration.")
-
-		return ctrl.Result{}, parseDurationErr
+	schedule, scheduleErr := common.ResolveSchedule(scheduledResource.CreationTimestamp, scheduledResource.Spec.In)
+	if scheduleErr != nil {
+		return ctrl.Result{}, scheduleErr
 	}
 
-	if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, scheduledResource.CreationTimestamp.Add(duration),
-		func() error {
-			content, contentErr := scheduledResource.GetContent()
-			if contentErr != nil {
-				logger.Error(contentErr, "Error while parsing content.")
+	if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, schedule, func() error {
+		content, contentErr := scheduledResource.GetContent()
+		if contentErr != nil {
+			logger.Error(contentErr, "Error while parsing content.")
 
-				return contentErr
-			}
+			return contentErr
+		}
 
-			if getErr := r.client.Get(context.Background(), client.
-				ObjectKeyFromObject(scheduledResource), scheduledResource); client.IgnoreNotFound(getErr) != nil {
-				logger.Error(contentErr, "Error while getting resource.")
+		if getErr := r.client.Get(context.Background(), client.
+			ObjectKeyFromObject(scheduledResource), scheduledResource); client.IgnoreNotFound(getErr) != nil {
+			logger.Error(contentErr, "Error while getting resource.")
 
-				return getErr
-			}
+			return getErr
+		}
 
-			if createErr := r.client.Create(context.Background(),
-				content); client.IgnoreAlreadyExists(createErr) != nil {
-				logger.Error(contentErr, "An error occurred while creating resource.")
+		if createErr := r.client.Create(context.Background(),
+			content); client.IgnoreAlreadyExists(createErr) != nil {
+			logger.Error(contentErr, "An error occurred while creating resource.")
 
-				scheduledResource.Status.Condition = v1alpha1.ConditionFailed
+			scheduledResource.Status.Condition = v1alpha1.ConditionFailed
 
-				return errors2.Join(createErr, r.client.Status().Update(context.Background(), scheduledResource))
-			}
+			return errors2.Join(createErr, r.client.Status().Update(context.Background(), scheduledResource))
+		}
 
-			logger.Info(fmt.Sprintf("%s created.", tag))
+		logger.Info(fmt.Sprintf("%s created.", tag))
 
-			_ = r.scheduler.DeleteTask(tag)
+		_ = r.scheduler.DeleteTask(tag)
 
-			scheduledResource.Status.Condition = v1alpha1.ConditionCreated
+		scheduledResource.Status.Condition = v1alpha1.ConditionCreated
 
-			return r.client.Status().Update(context.Background(), scheduledResource)
-		}); createOrUpdateTaskErr != nil {
+		return r.client.Status().Update(context.Background(), scheduledResource)
+	}); createOrUpdateTaskErr != nil {
 		logger.Error(createOrUpdateTaskErr, "Error while creating or updating task.")
 
 		return ctrl.Result{}, createOrUpdateTaskErr

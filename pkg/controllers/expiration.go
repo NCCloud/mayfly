@@ -2,16 +2,16 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/NCCloud/mayfly/pkg/common"
+	"github.com/go-co-op/gocron/v2"
+	errors2 "k8s.io/apimachinery/pkg/api/errors"
 
-	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 type ExpirationController struct {
@@ -40,58 +40,41 @@ func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) 
 		tag              = fmt.Sprintf("%s/%s/%s/%s/delete", apiVersion, kind, req.Name, req.Namespace)
 	)
 
-	logger.Info("Reconciliation started.")
-	defer logger.Info("Reconciliation finished.")
-
 	if getErr := r.client.Get(ctx, req.NamespacedName, resource); getErr != nil {
-		if errors.IsNotFound(getErr) {
-			_ = r.scheduler.DeleteTask(tag)
+		if errors2.IsNotFound(getErr) {
+			return ctrl.Result{}, r.scheduler.DeleteTask(tag)
 		}
 
 		return ctrl.Result{}, client.IgnoreNotFound(getErr)
 	}
 
-	hasExpired, expirationDate, hasExpiredErr := common.IsExpired(resource, r.config)
-	if hasExpiredErr != nil {
-		logger.Error(hasExpiredErr, "Error while checking if resource has expired.")
-
-		return ctrl.Result{}, hasExpiredErr
+	annotation, hasAnnotation := resource.GetAnnotations()[r.config.ExpirationLabel]
+	if !hasAnnotation {
+		return ctrl.Result{}, r.scheduler.DeleteTask(tag)
 	}
 
-	if hasExpired {
-		logger.Info("Resource already expired will be removed.")
+	schedule, scheduleErr := common.ResolveSchedule(resource.GetCreationTimestamp(), annotation)
+	if scheduleErr != nil {
+		return ctrl.Result{}, scheduleErr
+	}
 
-		_ = r.scheduler.DeleteTask(tag)
+	createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, schedule, func() error {
+		logger.Info("Deleted")
+
+		return client.IgnoreNotFound(r.client.Delete(ctx, resource))
+	})
+
+	if errors.Is(createOrUpdateTaskErr, gocron.ErrOneTimeJobStartDateTimePast) {
+		logger.Info("Deleted")
 
 		return ctrl.Result{}, client.IgnoreNotFound(r.client.Delete(ctx, resource))
 	}
 
-	if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, expirationDate, func() error {
-		return r.client.Delete(context.Background(), resource)
-	}); createOrUpdateTaskErr != nil {
-		logger.Error(createOrUpdateTaskErr, "Error while creating or updating task.")
+	logger.Info("Scheduled")
 
-		return ctrl.Result{}, createOrUpdateTaskErr
-	}
-
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, createOrUpdateTaskErr
 }
 
 func (r *ExpirationController) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(common.NewResourceInstance(r.apiVersionKind)).
-		WithEventFilter(predicate.Funcs{
-			CreateFunc: func(createEvent event.CreateEvent) bool {
-				return len(createEvent.Object.GetAnnotations()[r.config.ExpirationLabel]) != 0
-			},
-			DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
-				return len(deleteEvent.Object.GetAnnotations()[r.config.ExpirationLabel]) != 0
-			},
-			UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-				oldMayFlyAnnotation := updateEvent.ObjectOld.GetAnnotations()[r.config.ExpirationLabel]
-				newMayFlyAnnotation := updateEvent.ObjectNew.GetAnnotations()[r.config.ExpirationLabel]
-
-				return len(newMayFlyAnnotation) != 0 && oldMayFlyAnnotation != newMayFlyAnnotation
-			},
-		}).Complete(r)
+	return ctrl.NewControllerManagedBy(mgr).For(common.NewResourceInstance(r.apiVersionKind)).Complete(r)
 }
