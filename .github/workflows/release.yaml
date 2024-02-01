@@ -5,7 +5,7 @@ on:
     types: [published]
 
 env:
-  IMAGE: "nccloud/mayfly"
+  IMAGE: ${{ github.repository_owner }}/${{ github.repository }}
   REGISTRY: "ghcr.io"
   GO_VERSION: "1.21"
   TAG: ${{ github.event.release.tag_name }}
