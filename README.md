@@ -5,6 +5,13 @@
 
 > Mayfly is a Kubernetes operator that enables you to have time-based resources. They creates or deletes on the specified time.
 
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/nccloud/mayfly)
+![GitHub Release](https://img.shields.io/github/v/release/nccloud/mayfly)
+[![Go Reference](https://pkg.go.dev/badge/github.com/NCCloud/mayfly.svg)](https://pkg.go.dev/github.com/NCCloud/mayfly)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/nccloud/mayfly/test.yaml?label=tests)
+![GitHub issues](https://img.shields.io/github/issues/nccloud/mayfly)
+![GitHub License](https://img.shields.io/github/license/nccloud/mayfly)
+
 ## 📖 General Information
 
 ### 📄 Summary
