@@ -1,4 +1,4 @@
-package scheduled_resource
+package scheduledresource
 
 import (
 	"context"

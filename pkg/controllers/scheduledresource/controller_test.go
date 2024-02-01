@@ -1,9 +1,14 @@
-package scheduled_resource
+package scheduledresource
 
 import (
 	"context"
 	errors2 "errors"
 	"fmt"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
 	common2 "github.com/NCCloud/mayfly/mocks/github.com/NCCloud/mayfly/pkg/common"
 	cache2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/cache"
 	client2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,7 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"path/filepath"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/config"
@@ -32,9 +37,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
-	"strings"
-	"testing"
-	"time"
 )
 
 var testVars = struct {

@@ -1,10 +1,11 @@
 package common
 
 import (
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestScheduler_New(t *testing.T) {

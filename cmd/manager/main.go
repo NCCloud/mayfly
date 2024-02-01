@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/NCCloud/mayfly/pkg/controllers/expiration"
-	"github.com/NCCloud/mayfly/pkg/controllers/scheduled_resource"
+	"github.com/NCCloud/mayfly/pkg/controllers/scheduledresource"
 
 	"github.com/NCCloud/mayfly/pkg/apis/v1alpha1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -60,7 +61,7 @@ func main() {
 		}
 	}
 
-	if scheduledResourceControllerErr := scheduled_resource.NewController(config, client, scheduler).
+	if scheduledResourceControllerErr := scheduledresource.NewController(config, client, scheduler).
 		SetupWithManager(manager); scheduledResourceControllerErr != nil {
 		panic(scheduledResourceControllerErr)
 	}
