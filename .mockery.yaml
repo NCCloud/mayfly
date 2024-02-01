@@ -1,0 +1,14 @@
+packages:
+  sigs.k8s.io/controller-runtime/pkg/client:
+    interfaces:
+      Client:
+      SubResourceClient:
+  sigs.k8s.io/controller-runtime/pkg/cache:
+    interfaces:
+      Cache:
+  sigs.k8s.io/controller-runtime/pkg/manager:
+    interfaces:
+      Manager:
+  github.com/NCCloud/mayfly/pkg/common:
+    interfaces:
+      Scheduler:

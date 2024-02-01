@@ -1,2 +1,9 @@
 .idea
 .DS_Store
+*.out
+bin
+.vscode
+volumes
+*.txt
+.bin
+.envtest/*

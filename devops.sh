@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-export CONTROLLER_GEN_VERSION="v0.13.0"
-export GOLANGCI_LINT_VERSION="v1.54.2"
+export CONTROLLER_GEN_VERSION="v0.14.0"
+export GOLANGCI_LINT_VERSION="v1.55.2"
 export MOCKERY_GEN_VERSION="v2.36.0"
 export GOFUMPT_VERSION="v0.5.0"
 export TESTENV_VERSION="1.25.x!"
@@ -39,10 +39,17 @@ generate() {
   sed '/Compiled/d' pkg/apis/v1alpha1/zz_generated.deepcopy.go > pkg/apis/v1alpha1/zz_generated.deepcopy.gotmp
   mv pkg/apis/v1alpha1/zz_generated.deepcopy.gotmp pkg/apis/v1alpha1/zz_generated.deepcopy.go
   crd-ref-docs --source-path=./pkg/apis --config .apidoc.yaml --renderer markdown --output-path=./docs/api.md
+  mockery
 }
 
 install() {
   kubectl apply -f deploy/crds
+}
+
+prepare_envtest() {
+  mkdir -p .envtest/crds
+  mkdir -p .envtest/bins
+  cp -rf "$(setup-envtest use $TESTENV_VERSION -p path)"/* .envtest/bins/
 }
 
 test() {

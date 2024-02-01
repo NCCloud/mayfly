@@ -1,4 +1,4 @@
-package controllers
+package expiration
 
 import (
 	"context"
@@ -14,17 +14,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-type ExpirationController struct {
+type Controller struct {
 	config         *common.Config
 	client         client.Client
-	scheduler      *common.Scheduler
+	scheduler      common.Scheduler
 	apiVersionKind string
 }
 
-func NewExpirationController(config *common.Config, client client.Client,
-	apiVersionKind string, scheduler *common.Scheduler,
-) *ExpirationController {
-	return &ExpirationController{
+func NewController(config *common.Config, client client.Client,
+	apiVersionKind string, scheduler common.Scheduler,
+) *Controller {
+	return &Controller{
 		config:         config,
 		client:         client,
 		scheduler:      scheduler,
@@ -32,7 +32,7 @@ func NewExpirationController(config *common.Config, client client.Client,
 	}
 }
 
-func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var (
 		logger           = log.FromContext(ctx)
 		resource         = common.NewResourceInstance(r.apiVersionKind)
@@ -75,6 +75,6 @@ func (r *ExpirationController) Reconcile(ctx context.Context, req ctrl.Request) 
 	return ctrl.Result{}, createOrUpdateTaskErr
 }
 
-func (r *ExpirationController) SetupWithManager(mgr ctrl.Manager) error {
+func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).For(common.NewResourceInstance(r.apiVersionKind)).Complete(r)
 }

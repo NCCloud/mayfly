@@ -8,34 +8,39 @@ import (
 	"github.com/go-co-op/gocron/v2"
 )
 
-type Scheduler struct {
+type Scheduler interface {
+	CreateOrUpdateTask(tag string, date time.Time, task func() error) error
+	DeleteTask(tag string) error
+}
+
+type scheduler struct {
 	config    *Config
 	scheduler gocron.Scheduler
 }
 
-func NewScheduler(config *Config) *Scheduler {
-	schedulerInstance := &Scheduler{
+func NewScheduler(config *Config) Scheduler {
+	schedulerInstance := &scheduler{
 		config: config,
 	}
 
-	scheduler, newSchedulerErr := gocron.NewScheduler()
+	cronScheduler, newSchedulerErr := gocron.NewScheduler()
 	if newSchedulerErr != nil {
 		panic(newSchedulerErr)
 	}
 
-	if _, newJobErr := scheduler.NewJob(gocron.DurationJob(config.MonitoringInterval), gocron.NewTask(func() {
-		mayflyTotalJobs.Set(float64(len(scheduler.Jobs())) - 1)
+	if _, newJobErr := cronScheduler.NewJob(gocron.DurationJob(config.MonitoringInterval), gocron.NewTask(func() {
+		mayflyTotalJobs.Set(float64(len(cronScheduler.Jobs())) - 1)
 	}), gocron.WithTags("monitoring")); newJobErr != nil {
 		panic(newJobErr)
 	}
 
-	schedulerInstance.scheduler = scheduler
-	scheduler.Start()
+	schedulerInstance.scheduler = cronScheduler
+	cronScheduler.Start()
 
 	return schedulerInstance
 }
 
-func (s *Scheduler) CreateOrUpdateTask(tag string, date time.Time, task func() error) error {
+func (s *scheduler) CreateOrUpdateTask(tag string, date time.Time, task func() error) error {
 	job := pie.Of(s.scheduler.Jobs()).Filter(func(job gocron.Job) bool {
 		return slices.Contains(job.Tags(), tag)
 	}).First()
@@ -53,7 +58,7 @@ func (s *Scheduler) CreateOrUpdateTask(tag string, date time.Time, task func() e
 	return jobErr
 }
 
-func (s *Scheduler) DeleteTask(tag string) error {
+func (s *scheduler) DeleteTask(tag string) error {
 	job := pie.Of(s.scheduler.Jobs()).Filter(func(job gocron.Job) bool {
 		return slices.Contains(job.Tags(), tag)
 	}).First()

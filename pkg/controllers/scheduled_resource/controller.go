@@ -1,4 +1,4 @@
-package controllers
+package scheduled_resource
 
 import (
 	"context"
@@ -15,23 +15,23 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-type ScheduledResourceController struct {
+type Controller struct {
 	config    *common.Config
 	client    client.Client
-	scheduler *common.Scheduler
+	scheduler common.Scheduler
 }
 
-func NewScheduledResourceController(config *common.Config, client client.Client,
-	scheduler *common.Scheduler,
-) *ScheduledResourceController {
-	return &ScheduledResourceController{
+func NewController(config *common.Config, client client.Client,
+	scheduler common.Scheduler,
+) *Controller {
+	return &Controller{
 		config:    config,
 		client:    client,
 		scheduler: scheduler,
 	}
 }
 
-func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var (
 		logger            = log.FromContext(ctx)
 		scheduledResource = &v1alpha1.ScheduledResource{}
@@ -100,7 +100,7 @@ func (r *ScheduledResourceController) Reconcile(ctx context.Context, req ctrl.Re
 	return ctrl.Result{}, r.client.Status().Update(ctx, scheduledResource)
 }
 
-func (r *ScheduledResourceController) SetupWithManager(mgr ctrl.Manager) error {
+func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.ScheduledResource{}).
 		Complete(r)

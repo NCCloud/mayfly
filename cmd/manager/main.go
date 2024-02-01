@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/NCCloud/mayfly/pkg/controllers/expiration"
+	"github.com/NCCloud/mayfly/pkg/controllers/scheduled_resource"
 
 	"github.com/NCCloud/mayfly/pkg/apis/v1alpha1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
 	"github.com/NCCloud/mayfly/pkg/common"
-	"github.com/NCCloud/mayfly/pkg/controllers"
-
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -54,13 +54,13 @@ func main() {
 	scheduler := common.NewScheduler(config)
 
 	for _, resource := range config.Resources {
-		if expirationControllerErr := controllers.NewExpirationController(config, client, resource, scheduler).
+		if expirationControllerErr := expiration.NewController(config, client, resource, scheduler).
 			SetupWithManager(manager); expirationControllerErr != nil {
 			panic(expirationControllerErr)
 		}
 	}
 
-	if scheduledResourceControllerErr := controllers.NewScheduledResourceController(config, client, scheduler).
+	if scheduledResourceControllerErr := scheduled_resource.NewController(config, client, scheduler).
 		SetupWithManager(manager); scheduledResourceControllerErr != nil {
 		panic(scheduledResourceControllerErr)
 	}

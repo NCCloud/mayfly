@@ -7,24 +7,17 @@ linters:
     - gochecknoinits # Disallows to use init functions
     - ireturn # Disallows to return Interfaces
     - gci # Disable gci import ordering checker since its buggy
+    - forcetypeassert # Disallows to use type assertions without checking
     - depguard # Disallows to use non-listed packages
-    - tagalign # Disallows to use non-aligned tags
+    - gochecknoglobals # We like global variables
+    - tagalign # Buggy
+    - lll
+    - funlen
 linters-settings:
-  funlen:
-    lines: 90
-issues:
-  exclude-rules:
-    - path: .*/metrics.go
-      linters:
-        - gochecknoglobals
+  cyclop:
+    max-complexity: 12
 run:
   go: '1.21'
   tests: false
   skip-dirs:
     - cmd/benchmark
-  skip-files:
-    - cmd/.*.go
-    - mocks/.*.go
-    - common/config.go
-    - .*/groupversion_info.go
-    - .*/zz_generated.deepcopy.go
