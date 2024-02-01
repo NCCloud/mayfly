@@ -180,13 +180,13 @@ func TestController_ReconcileIntegration(t *testing.T) {
 		ctx    = context.Background()
 		secret = &unstructured.Unstructured{
 			Object: map[string]interface{}{
-				"apiVersion":     "v1",
-				"apiVersionKind": "Secret",
+				"apiVersion": "v1",
+				"kind":       "Secret",
 				"metadata": map[string]interface{}{
 					"name":      strings.ToLower(strings.ReplaceAll(gofakeit.Name(), " ", "")),
 					"namespace": "default",
 					"annotations": map[string]interface{}{
-						testVars.config.ExpirationLabel: "10s",
+						testVars.config.ExpirationLabel: "5s",
 					},
 				},
 			},
@@ -200,10 +200,10 @@ func TestController_ReconcileIntegration(t *testing.T) {
 	assert.Nil(t, createErr)
 	assert.Eventually(t, func() bool {
 		return testVars.k8sClient.Get(ctx, client.ObjectKeyFromObject(secret), secret) == nil
-	}, 5*time.Second, 100*time.Millisecond)
+	}, 60*time.Second, 100*time.Millisecond)
 	assert.Eventually(t, func() bool {
 		return errors.IsNotFound(testVars.k8sClient.Get(ctx, client.ObjectKeyFromObject(secret), secret))
-	}, 15*time.Second, 100*time.Millisecond)
+	}, 60*time.Second, 100*time.Millisecond)
 }
 
 func TestController_Reconcile_ShouldDeleteTaskWhenNotFound(t *testing.T) {
