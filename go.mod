@@ -4,9 +4,10 @@ go 1.21
 
 require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
+	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/elliotchance/pie/v2 v2.8.0
-	github.com/go-co-op/gocron/v2 v2.2.1
+	github.com/go-co-op/gocron/v2 v2.2.2
 	github.com/go-echarts/go-echarts/v2 v2.3.3
 	github.com/go-logr/logr v1.4.1
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
@@ -20,7 +21,6 @@ require (
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/brianvoe/gofakeit/v6 v6.28.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
@@ -36,7 +36,7 @@ require (
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.5.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/imdario/mergo v0.3.6 // indirect
 	github.com/jonboulle/clockwork v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
