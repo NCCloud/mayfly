@@ -1,0 +1,1 @@
+{"go-coverage-action-fmt":1,"coverage_pct":88.17204301075269,"pkg_stats":{"github.com/NCCloud/mayfly/pkg/common":[89.47368421052632],"github.com/NCCloud/mayfly/pkg/controllers/expiration":[95.23809523809523],"github.com/NCCloud/mayfly/pkg/controllers/scheduledresource":[82.35294117647058]},"skipped_count":7}
