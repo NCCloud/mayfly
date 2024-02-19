@@ -13,6 +13,7 @@ linters:
     - tagalign # Buggy
     - lll
     - funlen
+    - perfsprint
 linters-settings:
   cyclop:
     max-complexity: 12
