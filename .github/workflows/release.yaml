@@ -7,7 +7,7 @@ on:
 env:
   IMAGE: "nccloud/mayfly"
   REGISTRY: "ghcr.io"
-  GO_VERSION: "1.21"
+  GO_VERSION: "1.22"
   TAG: ${{ github.event.release.tag_name }}
 
 jobs:

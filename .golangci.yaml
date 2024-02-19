@@ -13,11 +13,13 @@ linters:
     - tagalign # Buggy
     - lll
     - funlen
+    - perfsprint
 linters-settings:
   cyclop:
     max-complexity: 12
 run:
-  go: '1.21'
+  go: '1.22'
+  timeout: 10m
   tests: false
   skip-dirs:
     - cmd/benchmark
