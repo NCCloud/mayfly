@@ -7,7 +7,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/elliotchance/pie/v2 v2.8.0
-	github.com/go-co-op/gocron/v2 v2.2.5
+	github.com/go-co-op/gocron/v2 v2.2.6
 	github.com/go-echarts/go-echarts/v2 v2.3.3
 	github.com/go-logr/logr v1.4.1
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
