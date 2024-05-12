@@ -30,6 +30,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm/v7,linux/arm64,darwin/amd64,darwin/arm64
+          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/386,darwin/amd64,darwin/arm64
           push: true
           tags: ${{ env.IMAGE }}:latest,${{ env.IMAGE }}:${TAG#v}
