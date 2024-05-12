@@ -137,6 +137,53 @@ func (_c *MockManager_AddHealthzCheck_Call) RunAndReturn(run func(string, health
 	return _c
 }
 
+// AddMetricsServerExtraHandler provides a mock function with given fields: path, handler
+func (_m *MockManager) AddMetricsServerExtraHandler(path string, handler http.Handler) error {
+	ret := _m.Called(path, handler)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AddMetricsServerExtraHandler")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, http.Handler) error); ok {
+		r0 = rf(path, handler)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockManager_AddMetricsServerExtraHandler_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddMetricsServerExtraHandler'
+type MockManager_AddMetricsServerExtraHandler_Call struct {
+	*mock.Call
+}
+
+// AddMetricsServerExtraHandler is a helper method to define mock.On call
+//   - path string
+//   - handler http.Handler
+func (_e *MockManager_Expecter) AddMetricsServerExtraHandler(path interface{}, handler interface{}) *MockManager_AddMetricsServerExtraHandler_Call {
+	return &MockManager_AddMetricsServerExtraHandler_Call{Call: _e.mock.On("AddMetricsServerExtraHandler", path, handler)}
+}
+
+func (_c *MockManager_AddMetricsServerExtraHandler_Call) Run(run func(path string, handler http.Handler)) *MockManager_AddMetricsServerExtraHandler_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(http.Handler))
+	})
+	return _c
+}
+
+func (_c *MockManager_AddMetricsServerExtraHandler_Call) Return(_a0 error) *MockManager_AddMetricsServerExtraHandler_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockManager_AddMetricsServerExtraHandler_Call) RunAndReturn(run func(string, http.Handler) error) *MockManager_AddMetricsServerExtraHandler_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AddReadyzCheck provides a mock function with given fields: name, check
 func (_m *MockManager) AddReadyzCheck(name string, check healthz.Checker) error {
 	ret := _m.Called(name, check)
