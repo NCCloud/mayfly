@@ -28,20 +28,21 @@ func TestResolveSchedule_Date(t *testing.T) {
 
 func TestResolveSchedule_Duration(t *testing.T) {
 	// given
-	date := metav1.Time{Time: gofakeit.Date()}
-	duration := 60 * time.Minute
+	currentDate := metav1.Time{Time: gofakeit.Date()}
+	duration := time.Duration(rand.Int31n(100000)) * time.Second
+	expected := currentDate.Add(duration)
 
 	// when
-	schedule, scheduleErr := ResolveSchedule(date, duration.String())
+	schedule, scheduleErr := ResolveSchedule(currentDate, duration.String())
 
 	// then
 	assert.Nil(t, scheduleErr)
-	assert.Equal(t, date.Year(), schedule.Year())
-	assert.Equal(t, date.Month(), schedule.Month())
-	assert.Equal(t, date.Day(), schedule.Day())
-	assert.Equal(t, date.Hour(), schedule.Hour()-1)
-	assert.Equal(t, date.Minute(), schedule.Minute())
-	assert.Equal(t, date.Second(), schedule.Second())
+	assert.Equal(t, expected.Year(), schedule.Year())
+	assert.Equal(t, expected.Month(), schedule.Month())
+	assert.Equal(t, expected.Day(), schedule.Day())
+	assert.Equal(t, expected.Hour(), schedule.Hour())
+	assert.Equal(t, expected.Minute(), schedule.Minute())
+	assert.Equal(t, expected.Second(), schedule.Second())
 }
 
 func TestNewResourceInstance(t *testing.T) {
