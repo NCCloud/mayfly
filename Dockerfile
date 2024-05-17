@@ -1,17 +1,13 @@
 FROM golang:1.22 as builder
-
-WORKDIR /workspace
-COPY go.mod go.mod
-COPY go.sum go.sum
-RUN go mod download
+WORKDIR /build
 
 COPY . .
+RUN CGO_ENABLED=0 go build -a -ldflags "-s -w" -o manager cmd/manager/main.go
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-s -w" -o manager cmd/manager/main.go
+FROM alpine:3
+WORKDIR /workspace
 
-FROM gcr.io/distroless/static:nonroot
-WORKDIR /app
+RUN apk --no-cache add ca-certificates && update-ca-certificates
 
-COPY --from=builder /workspace/manager .
-
-ENTRYPOINT ["/app/manager"]
+COPY --from=builder /build/manager manager
+ENTRYPOINT ["./manager"]
