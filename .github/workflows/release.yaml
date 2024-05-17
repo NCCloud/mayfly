@@ -5,9 +5,8 @@ on:
     types: [published]
 
 env:
-  IMAGE: "nccloud/mayfly"
   REGISTRY: "ghcr.io"
-  TAG: ${{ github.event.release.tag_name }}
+  IMAGE: "nccloud/mayfly"
 
 jobs:
   release:
@@ -16,6 +15,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Collect Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE }}
+          tags: type=semver,pattern={{version}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -29,7 +34,10 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
-          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/386,darwin/amd64,darwin/arm64
           push: true
-          tags: ${{ env.IMAGE }}:latest,${{ env.IMAGE }}:${TAG#v}
+          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/386
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
