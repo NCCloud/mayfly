@@ -7,7 +7,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/elliotchance/pie/v2 v2.8.1
-	github.com/go-co-op/gocron/v2 v2.7.0
+	github.com/go-co-op/gocron/v2 v2.7.1
 	github.com/go-echarts/go-echarts/v2 v2.3.3
 	github.com/go-logr/logr v1.4.2
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
@@ -55,7 +55,7 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
+	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
