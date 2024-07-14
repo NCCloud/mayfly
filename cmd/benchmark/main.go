@@ -87,7 +87,7 @@ func CreateChart(xAxis []string, yzAxis map[string][]opts.LineData) *charts.Line
 	line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
 		Title: pageTitle,
 	}), charts.WithLegendOpts(opts.Legend{
-		Show: true,
+		Show: opts.Bool(true),
 	}), charts.WithInitializationOpts(opts.Initialization{
 		PageTitle: pageTitle,
 		Width:     "1600px",
@@ -101,10 +101,10 @@ func CreateChart(xAxis []string, yzAxis map[string][]opts.LineData) *charts.Line
 				Opacity: 0.2,
 			}),
 			charts.WithLineChartOpts(opts.LineChart{
-				Smooth: false,
+				Smooth: opts.Bool(false),
 			}),
 			charts.WithMarkPointStyleOpts(
-				opts.MarkPointStyle{Label: &opts.Label{Show: true}}),
+				opts.MarkPointStyle{Label: &opts.Label{Show: opts.Bool(true)}}),
 		)
 	}
 	return line
