@@ -1,6 +1,6 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://abload.de/img/mayfly-logo-lightm5ib0.png">
-  <img alt="logo" width="600"  src="https://abload.de/img/mayfly-logo-darkt9eye.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/c7b76ed9-1c02-4172-bd6c-c37cf1cf6269">
+  <img alt="logo" width="600"  src="https://github.com/user-attachments/assets/65690736-3dbb-4e92-9d18-83b7a6284bd7">
 </picture>
 
 > Mayfly is a Kubernetes operator that enables you to have time-based resources. They creates or deletes on the specified time.
