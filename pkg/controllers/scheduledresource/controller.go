@@ -4,10 +4,11 @@ import (
 	"context"
 	errors2 "errors"
 	"fmt"
-	"k8s.io/apimachinery/pkg/api/errors"
+	"time"
 
 	"github.com/NCCloud/mayfly/pkg/apis/v1alpha2"
 	"github.com/NCCloud/mayfly/pkg/common"
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,6 +53,10 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		scheduledResource.CreationTimestamp, scheduledResource.Spec.Schedule)
 	isOneTimeSchedule := oneTimeScheduleErr == nil
 
+	if isOneTimeSchedule && scheduledResource.Status.Condition == v1alpha2.ConditionFinished {
+		return ctrl.Result{}, nil
+	}
+
 	task := func() error {
 		if scheduledResource.Status.Condition == v1alpha2.ConditionFinished {
 			return nil
@@ -80,30 +85,36 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return errors2.Join(createErr, r.client.Status().Update(context.Background(), scheduledResource))
 		}
 
-		logger.Info(fmt.Sprintf("%s created.", tag))
+		logger.Info(fmt.Sprintf("Task %s finished.", tag))
+
 		if isOneTimeSchedule {
+			_ = r.scheduler.DeleteTask(tag)
 			scheduledResource.Status.Condition = v1alpha2.ConditionFinished
 		}
+
+		scheduledResource.Status.NextRun = r.scheduler.GetTaskNextRun(tag)
+		scheduledResource.Status.LastRun = time.Now().Format(time.RFC3339)
 
 		return r.client.Status().Update(context.Background(), scheduledResource)
 	}
 
+	var createOrUpdateErr error
 	if isOneTimeSchedule {
-
-		if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateOneTimeTask(
-			tag, oneTimeSchedule, task); createOrUpdateTaskErr != nil {
-			return ctrl.Result{}, createOrUpdateTaskErr
-		}
+		createOrUpdateErr = r.scheduler.CreateOrUpdateOneTimeTask(tag, oneTimeSchedule, task)
 	} else {
-		if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateRecurringTask(
-			tag, scheduledResource.Spec.Schedule, task); createOrUpdateTaskErr != nil {
-			return ctrl.Result{}, createOrUpdateTaskErr
-		}
+		createOrUpdateErr = r.scheduler.CreateOrUpdateRecurringTask(tag, scheduledResource.Spec.Schedule, task)
 	}
 
-	scheduledResource.Status.Condition = v1alpha2.ConditionScheduled
+	scheduledResource.Status.NextRun = r.scheduler.GetTaskNextRun(tag)
 
-	return ctrl.Result{}, r.client.Status().Update(ctx, scheduledResource)
+	if createOrUpdateErr != nil {
+		scheduledResource.Status.Condition = v1alpha2.ConditionFailed
+	} else {
+		scheduledResource.Status.Condition = v1alpha2.ConditionScheduled
+	}
+
+	return ctrl.Result{}, errors2.Join(createOrUpdateErr,
+		r.client.Status().Update(context.Background(), scheduledResource))
 }
 
 func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {

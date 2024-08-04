@@ -163,6 +163,52 @@ func (_c *MockScheduler_DeleteTask_Call) RunAndReturn(run func(string) error) *M
 	return _c
 }
 
+// GetTaskNextRun provides a mock function with given fields: tag
+func (_m *MockScheduler) GetTaskNextRun(tag string) string {
+	ret := _m.Called(tag)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTaskNextRun")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(tag)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// MockScheduler_GetTaskNextRun_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetTaskNextRun'
+type MockScheduler_GetTaskNextRun_Call struct {
+	*mock.Call
+}
+
+// GetTaskNextRun is a helper method to define mock.On call
+//   - tag string
+func (_e *MockScheduler_Expecter) GetTaskNextRun(tag interface{}) *MockScheduler_GetTaskNextRun_Call {
+	return &MockScheduler_GetTaskNextRun_Call{Call: _e.mock.On("GetTaskNextRun", tag)}
+}
+
+func (_c *MockScheduler_GetTaskNextRun_Call) Run(run func(tag string)) *MockScheduler_GetTaskNextRun_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *MockScheduler_GetTaskNextRun_Call) Return(_a0 string) *MockScheduler_GetTaskNextRun_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockScheduler_GetTaskNextRun_Call) RunAndReturn(run func(string) string) *MockScheduler_GetTaskNextRun_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockScheduler creates a new instance of MockScheduler. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockScheduler(t interface {

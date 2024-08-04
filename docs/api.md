@@ -82,6 +82,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `nextRun` _string_ |  |  |  |
+| `lastRun` _string_ |  |  |  |
 | `condition` _[Condition](#condition)_ |  |  |  |
 
 
