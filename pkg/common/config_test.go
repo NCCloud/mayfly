@@ -15,3 +15,11 @@ func TestNewConfig(t *testing.T) {
 	// then
 	assert.NotEqual(t, *config, Config{})
 }
+
+func TestGroupAdjacentGroupVersionKinds(t *testing.T) {
+	t.Setenv("RESOURCES", "v1;Secret;ConfigMap")
+
+	config := NewConfig()
+
+	assert.Equal(t, config.Resources, []string{"v1;Secret", "v1;ConfigMap"})
+}

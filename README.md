@@ -27,8 +27,10 @@ To specify which resources should be monitored and cleaned up, you can set the `
 
 Example:
 ```bash
-export RESOURCES="v1;Secret,test.com/v1alpha;MyCRD"
+export RESOURCES="v1;Secret;ConfigMap,test.com/v1alpha;MyCRD"
 ```
+
+In the example above, Mayfly will watch `v1` `Secret` and `ConfigMap` resources as well as `test.com/v1alpha` `MyCRD`.
 
 ## 🚀 Usage
 
@@ -73,7 +75,7 @@ spec:
 ```
 
 > [!TIP]
-> mayfly uses [araddon/dateparser](https://github.com/araddon/dateparse) for arbitrary date parsing see [examples](https://github.com/araddon/dateparse?tab=readme-ov-file#extended-example) for possible date formats.
+> mayfly uses [araddon/dateparser](https://github.com/araddon/dateparse) for arbitrary date parsing. See [examples](https://github.com/araddon/dateparse?tab=readme-ov-file#extended-example) for possible date formats.
 
 ### Scheduled Resource Creation
 
