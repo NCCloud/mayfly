@@ -1,6 +1,7 @@
 package common
 
 import (
+	"strings"
 	"time"
 
 	"github.com/caarlos0/env/v10"
@@ -20,5 +21,21 @@ func NewConfig() *Config {
 		panic(err)
 	}
 
+	operatorConfig.GroupAdjacentGroupVersionKinds()
+
 	return operatorConfig
+}
+
+func (c *Config) GroupAdjacentGroupVersionKinds() {
+	var resources []string
+	for _, r := range c.Resources {
+		apiVersionKind := strings.Split(r, ";")
+		apiVersion := apiVersionKind[0]
+
+		for _, kind := range apiVersionKind[1:] {
+			resources = append(resources, apiVersion+";"+kind)
+		}
+	}
+
+	c.Resources = resources
 }
