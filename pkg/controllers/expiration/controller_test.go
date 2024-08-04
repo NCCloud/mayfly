@@ -11,7 +11,7 @@ import (
 	cache2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/cache"
 	client2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/client"
 	manager2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/manager"
-	"github.com/NCCloud/mayfly/pkg/apis/v1alpha1"
+	"github.com/NCCloud/mayfly/pkg/apis/v1alpha2"
 	"github.com/araddon/dateparse"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-co-op/gocron/v2"
@@ -51,7 +51,7 @@ var testVars = struct {
 func init() {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha2.AddToScheme(scheme))
 
 	kubeConfig, testEnvStartErr := (&envtest.Environment{
 		ControlPlane: envtest.ControlPlane{

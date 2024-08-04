@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/NCCloud/mayfly/pkg/common"
 	"github.com/go-co-op/gocron/v2"
 	errors2 "k8s.io/apimachinery/pkg/api/errors"
@@ -48,17 +47,17 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(getErr)
 	}
 
-	annotation, hasAnnotation := resource.GetAnnotations()[r.config.ExpirationLabel]
-	if !hasAnnotation {
+	expiration, hasExpiration := resource.GetAnnotations()[r.config.ExpirationLabel]
+	if !hasExpiration {
 		return ctrl.Result{}, r.scheduler.DeleteTask(tag)
 	}
 
-	schedule, scheduleErr := common.ResolveSchedule(resource.GetCreationTimestamp(), annotation)
-	if scheduleErr != nil {
-		return ctrl.Result{}, scheduleErr
+	date, dateErr := common.ResolveOneTimeSchedule(resource.GetCreationTimestamp(), expiration)
+	if dateErr != nil {
+		return ctrl.Result{}, dateErr
 	}
 
-	createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, schedule, func() error {
+	createOrUpdateTaskErr := r.scheduler.CreateOrUpdateOneTimeTask(tag, date, func() error {
 		logger.Info("Deleted")
 
 		return client.IgnoreNotFound(r.client.Delete(ctx, resource))

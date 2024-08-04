@@ -4,6 +4,7 @@ import (
 	"context"
 	errors2 "errors"
 	"fmt"
+	"github.com/NCCloud/mayfly/pkg/apis/v1alpha2"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -13,7 +14,6 @@ import (
 	cache2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/cache"
 	client2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/client"
 	manager2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/manager"
-	"github.com/NCCloud/mayfly/pkg/apis/v1alpha1"
 	"github.com/NCCloud/mayfly/pkg/common"
 	"github.com/araddon/dateparse"
 	"github.com/brianvoe/gofakeit/v6"
@@ -51,7 +51,7 @@ var testVars = struct {
 func init() {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha2.AddToScheme(scheme))
 
 	kubeConfig, testEnvStartErr := (&envtest.Environment{
 		ControlPlane: envtest.ControlPlane{
@@ -131,12 +131,12 @@ func TestController_Reconcile(t *testing.T) {
 		mockStatusClient  = new(client2.MockSubResourceClient)
 		mockScheduler     = new(common2.MockScheduler)
 		controller        = NewController(common.NewConfig(), mockClient, mockScheduler)
-		scheduledResource = &v1alpha1.ScheduledResource{
+		scheduledResource = &v1alpha2.ScheduledResource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      gofakeit.Name(),
 				Namespace: gofakeit.Name(),
 			},
-			Spec: v1alpha1.ScheduledResourceSpec{
+			Spec: v1alpha2.ScheduledResourceSpec{
 				In: gofakeit.FutureDate().String(),
 			},
 		}
@@ -146,9 +146,9 @@ func TestController_Reconcile(t *testing.T) {
 	mockStatusClient.EXPECT().Update(mock.Anything, mock.Anything).Return(nil)
 	mockClient.EXPECT().Status().Return(mockStatusClient)
 	mockClient.EXPECT().Get(mock.Anything, client.ObjectKeyFromObject(scheduledResource),
-		mock.AnythingOfType("*v1alpha1.ScheduledResource")).RunAndReturn(
+		mock.AnythingOfType("*v1alpha2.ScheduledResource")).RunAndReturn(
 		func(ctx context.Context, key types.NamespacedName, obj client.Object, opts ...client.GetOption) error {
-			scheduledResource.DeepCopyInto(obj.(*v1alpha1.ScheduledResource))
+			scheduledResource.DeepCopyInto(obj.(*v1alpha2.ScheduledResource))
 			return nil
 		})
 
@@ -159,10 +159,10 @@ func TestController_Reconcile(t *testing.T) {
 
 	// then
 	date, _ := dateparse.ParseAny(scheduledResource.Spec.In)
-	mockScheduler.AssertCalled(t, "CreateOrUpdateTask", fmt.Sprintf("v1alpha1/ScheduledResource/%s/%s/create",
+	mockScheduler.AssertCalled(t, "CreateOrUpdateTask", fmt.Sprintf("v1alpha2/ScheduledResource/%s/%s/create",
 		scheduledResource.Name, scheduledResource.Namespace), date, mock.Anything)
 	mockStatusClient.AssertCalled(t, "Update", mock.Anything, mock.MatchedBy(func(obj client.Object) bool {
-		return obj.(*v1alpha1.ScheduledResource).Status.Condition == v1alpha1.ConditionScheduled
+		return obj.(*v1alpha2.ScheduledResource).Status.Condition == v1alpha2.ConditionScheduled
 	}))
 	assert.Nil(t, reconcileErr)
 	assert.False(t, result.Requeue)
@@ -172,12 +172,12 @@ func TestController_ReconcileIntegration(t *testing.T) {
 	// given
 	var (
 		ctx               = context.Background()
-		scheduledResource = &v1alpha1.ScheduledResource{
+		scheduledResource = &v1alpha2.ScheduledResource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      strings.ToLower(strings.ReplaceAll(gofakeit.Name(), " ", "")),
 				Namespace: "default",
 			},
-			Spec: v1alpha1.ScheduledResourceSpec{
+			Spec: v1alpha2.ScheduledResourceSpec{
 				In: "5s",
 				Content: `apiVersion: v1
 kind: Secret
@@ -214,7 +214,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenNotFound(t *testing.T) {
 
 	mockScheduler.EXPECT().DeleteTask(mock.Anything).Return(nil)
 	mockClient.EXPECT().Get(mock.Anything, mock.Anything,
-		mock.AnythingOfType("*v1alpha1.ScheduledResource")).Return(errors.NewNotFound(schema.GroupResource{}, ""))
+		mock.AnythingOfType("*v1alpha2.ScheduledResource")).Return(errors.NewNotFound(schema.GroupResource{}, ""))
 
 	// when
 	result, reconcileErr := controller.Reconcile(ctx, ctrl.Request{
@@ -225,7 +225,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenNotFound(t *testing.T) {
 	})
 
 	// then
-	mockScheduler.AssertCalled(t, "DeleteTask", fmt.Sprintf("v1alpha1/ScheduledResource/%s/%s/create",
+	mockScheduler.AssertCalled(t, "DeleteTask", fmt.Sprintf("v1alpha2/ScheduledResource/%s/%s/create",
 		"my-secret", "my-namespace"))
 	assert.Nil(t, reconcileErr)
 	assert.False(t, result.Requeue)
@@ -238,21 +238,21 @@ func TestController_Reconcile_ShouldReturnErrWhenInFieldDoesNotMakeSense(t *test
 		mockClient        = new(client2.MockClient)
 		mockScheduler     = new(common2.MockScheduler)
 		controller        = NewController(common.NewConfig(), mockClient, mockScheduler)
-		scheduledResource = &v1alpha1.ScheduledResource{
+		scheduledResource = &v1alpha2.ScheduledResource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      gofakeit.Name(),
 				Namespace: gofakeit.Name(),
 			},
-			Spec: v1alpha1.ScheduledResourceSpec{
+			Spec: v1alpha2.ScheduledResourceSpec{
 				In: gofakeit.BeerName(),
 			},
 		}
 	)
 
 	mockClient.EXPECT().Get(mock.Anything, client.ObjectKeyFromObject(scheduledResource),
-		mock.AnythingOfType("*v1alpha1.ScheduledResource")).RunAndReturn(
+		mock.AnythingOfType("*v1alpha2.ScheduledResource")).RunAndReturn(
 		func(ctx context.Context, key types.NamespacedName, obj client.Object, opts ...client.GetOption) error {
-			scheduledResource.DeepCopyInto(obj.(*v1alpha1.ScheduledResource))
+			scheduledResource.DeepCopyInto(obj.(*v1alpha2.ScheduledResource))
 			return nil
 		})
 
@@ -274,12 +274,12 @@ func TestController_Reconcile_TaskShouldCreateItem(t *testing.T) {
 		mockStatusClient  = new(client2.MockSubResourceClient)
 		mockScheduler     = new(common2.MockScheduler)
 		controller        = NewController(common.NewConfig(), mockClient, mockScheduler)
-		scheduledResource = &v1alpha1.ScheduledResource{
+		scheduledResource = &v1alpha2.ScheduledResource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      gofakeit.Name(),
 				Namespace: gofakeit.Name(),
 			},
-			Spec: v1alpha1.ScheduledResourceSpec{
+			Spec: v1alpha2.ScheduledResourceSpec{
 				In: gofakeit.FutureDate().String(),
 				Content: `apiVersion: v1
 kind: Secret
@@ -295,9 +295,9 @@ metadata:
 	mockStatusClient.EXPECT().Update(mock.Anything, mock.Anything).Return(nil)
 	mockClient.EXPECT().Status().Return(mockStatusClient)
 	mockClient.EXPECT().Get(mock.Anything, client.ObjectKeyFromObject(scheduledResource),
-		mock.AnythingOfType("*v1alpha1.ScheduledResource")).RunAndReturn(
+		mock.AnythingOfType("*v1alpha2.ScheduledResource")).RunAndReturn(
 		func(ctx context.Context, key types.NamespacedName, obj client.Object, opts ...client.GetOption) error {
-			scheduledResource.DeepCopyInto(obj.(*v1alpha1.ScheduledResource))
+			scheduledResource.DeepCopyInto(obj.(*v1alpha2.ScheduledResource))
 			return nil
 		})
 	mockClient.EXPECT().Create(mock.Anything, mock.Anything).Return(nil)
@@ -309,7 +309,7 @@ metadata:
 	taskErr := mockScheduler.Calls[0].Arguments[2].(func() error)()
 
 	// then
-	mockScheduler.AssertCalled(t, "DeleteTask", fmt.Sprintf("v1alpha1/ScheduledResource/%s/%s/create",
+	mockScheduler.AssertCalled(t, "DeleteTask", fmt.Sprintf("v1alpha2/ScheduledResource/%s/%s/create",
 		scheduledResource.Name, scheduledResource.Namespace))
 	mockClient.AssertCalled(t, "Create", mock.Anything, mock.Anything)
 	assert.Nil(t, reconcileErr)
@@ -324,12 +324,12 @@ func TestController_Reconcile_ShouldFailedIfAnyErrorHappens(t *testing.T) {
 		mockStatusClient  = new(client2.MockSubResourceClient)
 		mockScheduler     = new(common2.MockScheduler)
 		controller        = NewController(common.NewConfig(), mockClient, mockScheduler)
-		scheduledResource = &v1alpha1.ScheduledResource{
+		scheduledResource = &v1alpha2.ScheduledResource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      gofakeit.Name(),
 				Namespace: gofakeit.Name(),
 			},
-			Spec: v1alpha1.ScheduledResourceSpec{
+			Spec: v1alpha2.ScheduledResourceSpec{
 				In: gofakeit.FutureDate().String(),
 				Content: `apiVersion: v1
 kind: Secret
@@ -345,9 +345,9 @@ metadata:
 	mockStatusClient.EXPECT().Update(mock.Anything, mock.Anything).Return(nil)
 	mockClient.EXPECT().Status().Return(mockStatusClient)
 	mockClient.EXPECT().Get(mock.Anything, client.ObjectKeyFromObject(scheduledResource),
-		mock.AnythingOfType("*v1alpha1.ScheduledResource")).RunAndReturn(
+		mock.AnythingOfType("*v1alpha2.ScheduledResource")).RunAndReturn(
 		func(ctx context.Context, key types.NamespacedName, obj client.Object, opts ...client.GetOption) error {
-			scheduledResource.DeepCopyInto(obj.(*v1alpha1.ScheduledResource))
+			scheduledResource.DeepCopyInto(obj.(*v1alpha2.ScheduledResource))
 			return nil
 		})
 	mockClient.EXPECT().Create(mock.Anything, mock.Anything).Return(errors2.New("an error"))
@@ -360,7 +360,7 @@ metadata:
 
 	// then
 	mockStatusClient.AssertCalled(t, "Update", mock.Anything, mock.MatchedBy(func(obj client.Object) bool {
-		return obj.(*v1alpha1.ScheduledResource).Status.Condition == v1alpha1.ConditionFailed
+		return obj.(*v1alpha2.ScheduledResource).Status.Condition == v1alpha2.ConditionFailed
 	}))
 	assert.Nil(t, reconcileErr)
 	assert.NotNil(t, taskErr)
@@ -377,7 +377,7 @@ func TestController_SetupWithManager(t *testing.T) {
 		scheme        = runtime.NewScheme()
 	)
 
-	addToSchemeErr := v1alpha1.AddToScheme(scheme)
+	addToSchemeErr := v1alpha2.AddToScheme(scheme)
 	mockManager.EXPECT().GetControllerOptions().Return(config.Controller{})
 	mockManager.EXPECT().GetScheme().Return(scheme)
 	mockManager.EXPECT().GetCache().Return(mockCache)

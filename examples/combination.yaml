@@ -1,11 +1,9 @@
-apiVersion: cloud.namecheap.com/v1alpha1
+apiVersion: cloud.namecheap.com/v1alpha2
 kind: ScheduledResource
 metadata:
   name: combination-example
-  annotations:
-    mayfly.cloud.namecheap.com/expire: 10s
 spec:
-  in: "5s"
+  schedule: "5s"
   content: |
     apiVersion: v1
     kind: Secret

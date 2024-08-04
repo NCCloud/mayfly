@@ -1,8 +1,7 @@
-package v1alpha1
+package v1alpha2
 
 import (
 	"errors"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
@@ -14,7 +13,7 @@ type (
 )
 
 const (
-	ConditionCreated   Condition = "Created"
+	ConditionFinished  Condition = "Finished"
 	ConditionScheduled Condition = "Scheduled"
 	ConditionFailed    Condition = "Failed"
 )
@@ -27,7 +26,7 @@ func init() {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="In",type=string,JSONPath=".spec.in"
+//+kubebuilder:printcolumn:name="Schedule",type=string,JSONPath=".spec.schedule"
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
 //+kubebuilder:printcolumn:name="Condition",type=string,JSONPath=".status.condition"
 
@@ -48,8 +47,9 @@ type ScheduledResourceList struct {
 }
 
 type ScheduledResourceSpec struct {
-	In      string `json:"in"`
-	Content string `json:"content"`
+	// +kubebuilder:validation:Immutable=true
+	Schedule string `json:"schedule"`
+	Content  string `json:"content"`
 }
 
 type ScheduledResourceStatus struct {

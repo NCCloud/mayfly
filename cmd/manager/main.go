@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/NCCloud/mayfly/pkg/apis/v1alpha2"
 
 	"github.com/NCCloud/mayfly/pkg/controllers/expiration"
 	"github.com/NCCloud/mayfly/pkg/controllers/scheduledresource"
 
-	"github.com/NCCloud/mayfly/pkg/apis/v1alpha1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
 	"github.com/NCCloud/mayfly/pkg/common"
@@ -29,7 +29,7 @@ func main() {
 	scheme := runtime.NewScheme()
 	config := common.NewConfig()
 
-	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha2.AddToScheme(scheme))
 	ctrl.SetLogger(logger)
 
 	logger.Info("Configuration", "config", config)

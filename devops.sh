@@ -36,8 +36,6 @@ generate() {
   rm -rf deploy/crds
   controller-gen object paths="./..."
   controller-gen crd paths="./..." output:dir=deploy/crds
-  sed '/Compiled/d' pkg/apis/v1alpha1/zz_generated.deepcopy.go > pkg/apis/v1alpha1/zz_generated.deepcopy.gotmp
-  mv pkg/apis/v1alpha1/zz_generated.deepcopy.gotmp pkg/apis/v1alpha1/zz_generated.deepcopy.go
   crd-ref-docs --source-path=./pkg/apis --config .apidoc.yaml --renderer markdown --output-path=./docs/api.md
   mockery
 }

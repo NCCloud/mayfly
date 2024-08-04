@@ -15,8 +15,8 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.in
-      name: In
+    - jsonPath: .spec.schedule
+      name: Schedule
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
@@ -24,7 +24,7 @@ spec:
     - jsonPath: .status.condition
       name: Condition
       type: string
-    name: v1alpha1
+    name: v1alpha2
     schema:
       openAPIV3Schema:
         properties:
@@ -49,11 +49,11 @@ spec:
             properties:
               content:
                 type: string
-              in:
+              schedule:
                 type: string
             required:
             - content
-            - in
+            - schedule
             type: object
           status:
             properties:

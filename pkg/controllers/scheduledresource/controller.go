@@ -4,10 +4,9 @@ import (
 	"context"
 	errors2 "errors"
 	"fmt"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/NCCloud/mayfly/pkg/apis/v1alpha1"
+	"github.com/NCCloud/mayfly/pkg/apis/v1alpha2"
 	"github.com/NCCloud/mayfly/pkg/common"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -34,8 +33,8 @@ func NewController(config *common.Config, client client.Client,
 func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var (
 		logger            = log.FromContext(ctx)
-		scheduledResource = &v1alpha1.ScheduledResource{}
-		tag               = fmt.Sprintf("v1alpha1/ScheduledResource/%s/%s/create", req.Name, req.Namespace)
+		scheduledResource = &v1alpha2.ScheduledResource{}
+		tag               = fmt.Sprintf("v1alpha2/ScheduledResource/%s/%s/create", req.Name, req.Namespace)
 	)
 
 	logger.Info("Reconciliation started.")
@@ -49,16 +48,15 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(getErr)
 	}
 
-	if scheduledResource.Status.Condition == v1alpha1.ConditionCreated {
-		return ctrl.Result{}, nil
-	}
+	oneTimeSchedule, oneTimeScheduleErr := common.ResolveOneTimeSchedule(
+		scheduledResource.CreationTimestamp, scheduledResource.Spec.Schedule)
+	isOneTimeSchedule := oneTimeScheduleErr == nil
 
-	schedule, scheduleErr := common.ResolveSchedule(scheduledResource.CreationTimestamp, scheduledResource.Spec.In)
-	if scheduleErr != nil {
-		return ctrl.Result{}, scheduleErr
-	}
+	task := func() error {
+		if scheduledResource.Status.Condition == v1alpha2.ConditionFinished {
+			return nil
+		}
 
-	if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateTask(tag, schedule, func() error {
 		content, contentErr := scheduledResource.GetContent()
 		if contentErr != nil {
 			logger.Error(contentErr, "Error while parsing content.")
@@ -77,31 +75,39 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			content); client.IgnoreAlreadyExists(createErr) != nil {
 			logger.Error(contentErr, "An error occurred while creating resource.")
 
-			scheduledResource.Status.Condition = v1alpha1.ConditionFailed
+			scheduledResource.Status.Condition = v1alpha2.ConditionFailed
 
 			return errors2.Join(createErr, r.client.Status().Update(context.Background(), scheduledResource))
 		}
 
 		logger.Info(fmt.Sprintf("%s created.", tag))
-
-		_ = r.scheduler.DeleteTask(tag)
-
-		scheduledResource.Status.Condition = v1alpha1.ConditionCreated
+		if isOneTimeSchedule {
+			scheduledResource.Status.Condition = v1alpha2.ConditionFinished
+		}
 
 		return r.client.Status().Update(context.Background(), scheduledResource)
-	}); createOrUpdateTaskErr != nil {
-		logger.Error(createOrUpdateTaskErr, "Error while creating or updating task.")
-
-		return ctrl.Result{}, createOrUpdateTaskErr
 	}
 
-	scheduledResource.Status.Condition = v1alpha1.ConditionScheduled
+	if isOneTimeSchedule {
+
+		if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateOneTimeTask(
+			tag, oneTimeSchedule, task); createOrUpdateTaskErr != nil {
+			return ctrl.Result{}, createOrUpdateTaskErr
+		}
+	} else {
+		if createOrUpdateTaskErr := r.scheduler.CreateOrUpdateRecurringTask(
+			tag, scheduledResource.Spec.Schedule, task); createOrUpdateTaskErr != nil {
+			return ctrl.Result{}, createOrUpdateTaskErr
+		}
+	}
+
+	scheduledResource.Status.Condition = v1alpha2.ConditionScheduled
 
 	return ctrl.Result{}, r.client.Status().Update(ctx, scheduledResource)
 }
 
 func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.ScheduledResource{}).
+		For(&v1alpha2.ScheduledResource{}).
 		Complete(r)
 }
