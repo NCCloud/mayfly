@@ -26,7 +26,7 @@ Mayfly is an easy-to-use and configurable project that uses resource watches and
 To specify which resources should be monitored and cleaned up, you can set the `RESOURCES` environment variable to a comma-separated list of `{ApiVersion};{Kind}` as text. This allows you to customize which resources are targeted for cleanup with expiration annotations.
 
 Example:
-```
+```bash
 export RESOURCES="v1;Secret,test.com/v1alpha;MyCRD"
 ```
 
@@ -34,11 +34,11 @@ export RESOURCES="v1;Secret,test.com/v1alpha;MyCRD"
 
 ### Resouce Expiration
 
-Once you have determined which resources you want Mayfly to monitor, you can set the `mayfly.cloud.namecheap.com/expire` annotation on those resources with a duration value. This will cause Mayfly to delete the resources once the specified duration has passed, based on the time of their creation.
-Keep in mind that the expiration will be calculated based on the creation time of the resource.
+Once you have determined which resources you want Mayfly to monitor, you can set the `mayfly.cloud.namecheap.com/expire` annotation on those resources with a duration value or an exact date. In case of duration values, mayfly will calculate the expiration time based on the creation time of the resource. In case of exact date values, mayfly will delete the resource when the exact date has passed. See the examples below for duration and exact date values.
 
-Example:
-```
+Duration Value Example:
+
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -54,12 +54,33 @@ spec:
         - infinity
 ```
 
+Exact Date/Time Example:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  annotations:
+    mayfly.cloud.namecheap.com/expire: "2024-12-31T00:00:00Z"
+spec:
+  containers:
+    - name: alpine
+      image: alpine
+      command:
+        - sleep
+        - infinity
+```
+
+> [!TIP]
+> mayfly uses [araddon/dateparser](https://github.com/araddon/dateparse) for arbitrary date parsing see [examples](https://github.com/araddon/dateparse?tab=readme-ov-file#extended-example) for possible date formats.
+
 ### Scheduled Resource Creation
 
 The `ScheduledResource` CRD allows you to schedule the creation of an object in the future. This can be combined with the expire annotation, enabling Mayfly to create and remove certain objects for a temporary period in the future.
 
 Example:
-```
+```yaml
 apiVersion: cloud.namecheap.com/v1alpha1
 kind: ScheduledResource
 metadata:
@@ -89,7 +110,7 @@ This feature is particularly useful for setting up temporary resources that are 
 The easiest and most recommended way to deploy the Mayfly operator to your Kubernetes cluster is by using the Helm chart. To do this, you will need to add our Helm repository and install it from there, providing the RESOURCES environment variable as needed. If you prefer, you can also compile the operator and install it using any method you choose.
 
 Example:
-```
+```bash
 helm repo add nccloud https://nccloud.github.io/charts
 helm install mayfly nccloud/mayfly --set "env[0].name=RESOURCES" --set "env[0].value=v1;Secret" #For only secrets
 ```

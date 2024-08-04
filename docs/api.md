@@ -24,6 +24,11 @@ _Underlying type:_ _string_
 _Appears in:_
 - [ScheduledResourceStatus](#scheduledresourcestatus)
 
+| Field | Description |
+| --- | --- |
+| `Created` |  |
+| `Scheduled` |  |
+| `Failed` |  |
 
 
 
