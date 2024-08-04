@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func ResolveSchedule(creationTimestamp metav1.Time, dateTimeDuration string) (time.Time, error) {
+func ResolveOneTimeSchedule(creationTimestamp metav1.Time, dateTimeDuration string) (time.Time, error) {
 	duration, parseDurationErr := time.ParseDuration(dateTimeDuration)
 	if parseDurationErr == nil {
 		return creationTimestamp.Add(duration), nil

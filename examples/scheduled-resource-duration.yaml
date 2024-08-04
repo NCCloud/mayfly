@@ -1,14 +1,14 @@
-apiVersion: cloud.namecheap.com/v1alpha1
+apiVersion: cloud.namecheap.com/v1alpha2
 kind: ScheduledResource
 metadata:
-  name: scheduled-resource-example
+  name: scheduled-resource-duration
 spec:
-  in: "5s"
+  schedule: "10s" # Creates in 10 seconds
   content: |
     apiVersion: v1
     kind: Secret
     metadata:
-      name: scheduled-resource-example
+      name: scheduled-resource-duration-example
       namespace: default
     data:
       .secret-file: dmFsdWUtMg0KDQo=

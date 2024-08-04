@@ -1,0 +1,14 @@
+apiVersion: cloud.namecheap.com/v1alpha2
+kind: ScheduledResource
+metadata:
+  name: scheduled-resource-cronjob
+spec:
+  schedule: "*/10 * * * * *" # Creates every 10 second
+  content: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: scheduled-resource-cronjob-example
+      namespace: default
+    data:
+      .secret-file: dmFsdWUtMg0KDQo=

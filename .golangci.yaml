@@ -2,7 +2,6 @@ linters:
   enable-all: true
   disable:
     - exhaustruct # Disallows to left unused fields in structs
-    - exhaustivestruct # Disallows to left unused fields in structs
     - wrapcheck # Disallows to use non-wrapped errors
     - gochecknoinits # Disallows to use init functions
     - ireturn # Disallows to return Interfaces
@@ -22,5 +21,6 @@ run:
   go: '1.22'
   timeout: 10m
   tests: false
-  skip-dirs:
+issues:
+  exclude-dirs:
     - cmd/benchmark

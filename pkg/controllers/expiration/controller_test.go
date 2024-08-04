@@ -7,14 +7,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/go-co-op/gocron/v2"
+
 	common2 "github.com/NCCloud/mayfly/mocks/github.com/NCCloud/mayfly/pkg/common"
 	cache2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/cache"
 	client2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/client"
 	manager2 "github.com/NCCloud/mayfly/mocks/sigs.k8s.io/controller-runtime/pkg/manager"
-	"github.com/NCCloud/mayfly/pkg/apis/v1alpha1"
+	"github.com/NCCloud/mayfly/pkg/apis/v1alpha2"
 	"github.com/araddon/dateparse"
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/go-co-op/gocron/v2"
 	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -51,7 +52,7 @@ var testVars = struct {
 func init() {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha2.AddToScheme(scheme))
 
 	kubeConfig, testEnvStartErr := (&envtest.Environment{
 		ControlPlane: envtest.ControlPlane{
@@ -153,7 +154,7 @@ func TestController_Reconcile(t *testing.T) {
 		}
 	)
 
-	mockScheduler.EXPECT().CreateOrUpdateTask(mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	mockScheduler.EXPECT().CreateOrUpdateOneTimeTask(mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	mockClient.EXPECT().Get(mock.Anything, client.ObjectKeyFromObject(secret),
 		mock.AnythingOfType("*unstructured.Unstructured")).RunAndReturn(
 		func(ctx context.Context, key types.NamespacedName, obj client.Object, opts ...client.GetOption) error {
@@ -170,8 +171,8 @@ func TestController_Reconcile(t *testing.T) {
 	date, _ := dateparse.ParseAny(secret.
 		Object["metadata"].(map[string]interface{})["annotations"].(map[string]interface{})[config.
 		ExpirationLabel].(string))
-	mockScheduler.AssertCalled(t, "CreateOrUpdateTask", "v1/Secret/my-secret/my-namespace/delete",
-		date, mock.Anything)
+	mockScheduler.AssertCalled(t, "CreateOrUpdateOneTimeTask",
+		"v1/Secret/my-secret/my-namespace/delete", date, mock.Anything)
 	assert.Nil(t, reconcileErr)
 	assert.False(t, result.Requeue)
 }
@@ -356,7 +357,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenAnnotationValueIsPast(t *testi
 			},
 		}
 	)
-	mockScheduler.EXPECT().CreateOrUpdateTask(mock.Anything, mock.Anything, mock.Anything).
+	mockScheduler.EXPECT().CreateOrUpdateOneTimeTask(mock.Anything, mock.Anything, mock.Anything).
 		Return(gocron.ErrOneTimeJobStartDateTimePast)
 	mockScheduler.EXPECT().DeleteTask(mock.Anything).Return(nil)
 	mockClient.EXPECT().Delete(mock.Anything, mock.Anything).Return(nil)

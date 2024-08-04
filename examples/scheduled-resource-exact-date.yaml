@@ -1,0 +1,14 @@
+apiVersion: cloud.namecheap.com/v1alpha2
+kind: ScheduledResource
+metadata:
+  name: scheduled-resource-exact-date
+spec:
+  schedule: "2024-12-31T00:00:00Z" # Creates at exact date
+  content: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: scheduled-resource-exact-date-example
+      namespace: default
+    data:
+      .secret-file: dmFsdWUtMg0KDQo=
