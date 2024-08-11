@@ -1,4 +1,4 @@
-package v1alpha1
+package v1alpha2
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ type (
 )
 
 const (
-	ConditionCreated   Condition = "Created"
+	ConditionFinished  Condition = "Finished"
 	ConditionScheduled Condition = "Scheduled"
 	ConditionFailed    Condition = "Failed"
 )
@@ -25,11 +25,13 @@ func init() {
 	SchemeBuilder.Register(&ScheduledResource{}, &ScheduledResourceList{})
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="In",type=string,JSONPath=".spec.in"
-//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
-//+kubebuilder:printcolumn:name="Condition",type=string,JSONPath=".status.condition"
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Schedule",type=string,JSONPath=".spec.schedule"
+// +kubebuilder:printcolumn:name="Next Run",type=string,JSONPath=".status.nextRun"
+// +kubebuilder:printcolumn:name="Last Run",type=string,JSONPath=".status.lastRun"
+// +kubebuilder:printcolumn:name="Condition",type=string,JSONPath=".status.condition"
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
 
 type ScheduledResource struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -48,11 +50,13 @@ type ScheduledResourceList struct {
 }
 
 type ScheduledResourceSpec struct {
-	In      string `json:"in"`
-	Content string `json:"content"`
+	Schedule string `json:"schedule"`
+	Content  string `json:"content"`
 }
 
 type ScheduledResourceStatus struct {
+	NextRun   string    `json:"nextRun"`
+	LastRun   string    `json:"lastRun"`
 	Condition Condition `json:"condition"`
 }
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 export CONTROLLER_GEN_VERSION="v0.15.0"
-export GOLANGCI_LINT_VERSION="v1.58.1"
-export MOCKERY_GEN_VERSION="v2.42.3"
+export GOLANGCI_LINT_VERSION="v1.59.1"
+export MOCKERY_GEN_VERSION="v2.44.1"
 export GOFUMPT_VERSION="v0.6.0"
 export TESTENV_VERSION="1.25.x!"
 
@@ -36,8 +36,6 @@ generate() {
   rm -rf deploy/crds
   controller-gen object paths="./..."
   controller-gen crd paths="./..." output:dir=deploy/crds
-  sed '/Compiled/d' pkg/apis/v1alpha1/zz_generated.deepcopy.go > pkg/apis/v1alpha1/zz_generated.deepcopy.gotmp
-  mv pkg/apis/v1alpha1/zz_generated.deepcopy.gotmp pkg/apis/v1alpha1/zz_generated.deepcopy.go
   crd-ref-docs --source-path=./pkg/apis --config .apidoc.yaml --renderer markdown --output-path=./docs/api.md
   mockery
 }

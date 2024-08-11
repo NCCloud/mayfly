@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: exact-expiration-example
+  name: expiration-duration
   namespace: default
   annotations:
-    mayfly.cloud.namecheap.com/expire: "2024-12-31T00:00:00Z"
+    mayfly.cloud.namecheap.com/expire: "10s"
 data:
   .secret-file: dmFsdWUtMg0KDQo=

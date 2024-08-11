@@ -15,7 +15,7 @@ func TestResolveSchedule_Date(t *testing.T) {
 	date := gofakeit.Date()
 
 	// when
-	schedule, scheduleErr := ResolveSchedule(metav1.Time{}, date.String())
+	schedule, scheduleErr := ResolveOneTimeSchedule(metav1.Time{}, date.String())
 
 	// then
 	assert.Nil(t, scheduleErr)
@@ -34,7 +34,7 @@ func TestResolveSchedule_Duration(t *testing.T) {
 	expected := currentDate.Add(duration)
 
 	// when
-	schedule, scheduleErr := ResolveSchedule(currentDate, duration.String())
+	schedule, scheduleErr := ResolveOneTimeSchedule(currentDate, duration.String())
 
 	// then
 	assert.Nil(t, scheduleErr)
