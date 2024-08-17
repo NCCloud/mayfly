@@ -119,6 +119,7 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		Named("ScheduledResource").
 		For(&v1alpha2.ScheduledResource{}).
 		Complete(r)
 }

@@ -55,9 +55,9 @@ type ScheduledResourceSpec struct {
 }
 
 type ScheduledResourceStatus struct {
-	NextRun   string    `json:"nextRun"`
-	LastRun   string    `json:"lastRun"`
-	Condition Condition `json:"condition"`
+	NextRun   string    `json:"nextRun,omitempty"`
+	LastRun   string    `json:"lastRun,omitempty"`
+	Condition Condition `json:"condition,omitempty"`
 }
 
 func (in *ScheduledResource) IsBeingDeleted() bool {

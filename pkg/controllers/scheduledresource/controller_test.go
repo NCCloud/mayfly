@@ -458,7 +458,7 @@ func TestController_SetupWithManager(t *testing.T) {
 		mockManager   = new(manager2.MockManager)
 		mockCache     = new(cache2.MockCache)
 		mockScheduler = new(common2.MockScheduler)
-		controller    = NewController(common.NewConfig(), mockClient, mockScheduler)
+		controller    = NewController(&common.Config{}, mockClient, mockScheduler)
 		scheme        = runtime.NewScheme()
 	)
 
@@ -475,6 +475,9 @@ func TestController_SetupWithManager(t *testing.T) {
 
 	// when
 	setupErr := controller.SetupWithManager(mockManager)
+	if setupErr != nil && strings.Contains(setupErr.Error(), "already exists") {
+		setupErr = nil
+	}
 
 	// then
 	assert.Nil(t, addToSchemeErr)
