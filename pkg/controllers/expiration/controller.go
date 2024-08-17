@@ -76,5 +76,8 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).For(common.NewResourceInstance(r.apiVersionKind)).Complete(r)
+	return ctrl.NewControllerManagedBy(mgr).
+		Named(fmt.Sprintf("Expiration/%s", r.apiVersionKind)).
+		For(common.NewResourceInstance(r.apiVersionKind)).
+		Complete(r)
 }

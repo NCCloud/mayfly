@@ -9,13 +9,13 @@ permissions:
   contents: write
 
 env:
-  GO_VERSION: "1.22"
+  GO_VERSION: "1.23"
   GOPRIVATE: "github:com/NCCloud/*"
 
 jobs:
   tests:
     name: Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Install Go
         uses: actions/setup-go@v5
@@ -31,7 +31,7 @@ jobs:
         run: |
           ./devops.sh prepare_envtest
       - name: Coverage Report
-        uses: gwatts/go-coverage-action@v1
+        uses: gwatts/go-coverage-action@v2
         id: coverage
         with:
           coverage-threshold: 80

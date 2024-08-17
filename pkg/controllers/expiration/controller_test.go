@@ -386,7 +386,7 @@ func TestController_SetupWithManager(t *testing.T) {
 		mockManager    = new(manager2.MockManager)
 		mockCache      = new(cache2.MockCache)
 		mockScheduler  = new(common2.MockScheduler)
-		apiVersionKind = "v1;Secret"
+		apiVersionKind = "v1;ConfigMap"
 
 		controller = NewController(common.NewConfig(), mockClient, apiVersionKind, mockScheduler)
 	)

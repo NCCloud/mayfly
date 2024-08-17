@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-export CONTROLLER_GEN_VERSION="v0.15.0"
-export GOLANGCI_LINT_VERSION="v1.59.1"
-export MOCKERY_GEN_VERSION="v2.44.1"
-export GOFUMPT_VERSION="v0.6.0"
+export CONTROLLER_GEN_VERSION="v0.16.1"
+export GOLANGCI_LINT_VERSION="v1.60.1"
+export MOCKERY_GEN_VERSION="v2.44.2"
+export GOFUMPT_VERSION="v0.7.0"
 export TESTENV_VERSION="1.25.x!"
 
 prerequisites() {
