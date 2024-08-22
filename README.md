@@ -18,7 +18,7 @@
 
 The Mayfly Operator allows you to have your resources on your cluster for a temporary time by the given expiration or mayfly create the resources at the time you specified.
 It deletes those resources from the cluster, according to the Mayfly expiration annotation that you set to specify how long the resource should remain active. This can be used to create temporary resources, temporary accesses, or simply to keep your cluster organized and tidy. 
-Also, It creates the resources you specify at the given time by using `ScheduleResource` custom resource definition. You can also merge these two features together, just to have some resource created in the future and only for a specific amount of time.   
+Also, It creates the resources you specify at the given time or given period by using `ScheduleResource` custom resource definition. You can also merge these two features together, just to have some resource created in the future once or periodically  and only for a specific amount of time.   
 
 ### 🛠 Configuration
 
@@ -89,7 +89,9 @@ metadata:
   name: example
   namespace: default
 spec:
-  in: 30m
+  schedule: "10s" # Creates in 10 seconds
+  # schedule: "2024-12-31T00:00:00Z" Creates in exact specified date
+  # schedule: "*/20 * * * * *" # Creates every 20 seconds
   content: |
     apiVersion: v1
     kind: Secret
