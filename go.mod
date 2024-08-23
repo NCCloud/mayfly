@@ -11,7 +11,7 @@ require (
 	github.com/go-echarts/go-echarts/v2 v2.4.1
 	github.com/go-logr/logr v1.4.2
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
-	github.com/prometheus/client_golang v1.20.0
+	github.com/prometheus/client_golang v1.20.1
 	github.com/stretchr/testify v1.9.0
 	k8s.io/api v0.31.0
 	k8s.io/apimachinery v0.31.0
