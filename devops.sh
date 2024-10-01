@@ -29,7 +29,7 @@ prerequisites() {
 
 lint() {
   gofumpt -l -w .
-  golangci-lint run --timeout=10m
+  golangci-lint run
 }
 
 generate() {
