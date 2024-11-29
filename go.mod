@@ -6,7 +6,7 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/caarlos0/env/v10 v10.0.0
-	github.com/elliotchance/pie/v2 v2.9.0
+	github.com/elliotchance/pie/v2 v2.9.1
 	github.com/go-co-op/gocron/v2 v2.12.4
 	github.com/go-echarts/go-echarts/v2 v2.4.5
 	github.com/go-logr/logr v1.4.2
