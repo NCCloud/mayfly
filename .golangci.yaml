@@ -18,7 +18,7 @@ linters-settings:
   cyclop:
     max-complexity: 12
 run:
-  go: '1.22'
+  go: '1.24'
   timeout: 10m
   tests: false
 issues:
