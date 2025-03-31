@@ -27,6 +27,9 @@ spec:
     - jsonPath: .status.condition
       name: Condition
       type: string
+    - jsonPath: .status.completions
+      name: Completions
+      type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
@@ -57,12 +60,17 @@ spec:
                 type: string
               schedule:
                 type: string
+              completions:
+                type: integer
+                minimum: 1
             required:
             - content
             - schedule
             type: object
           status:
             properties:
+              completions:
+                type: integer
               condition:
                 type: string
               lastRun:

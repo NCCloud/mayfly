@@ -50,14 +50,16 @@ type ScheduledResourceList struct {
 }
 
 type ScheduledResourceSpec struct {
-	Schedule string `json:"schedule"`
-	Content  string `json:"content"`
+	Schedule    string `json:"schedule"`
+	Completions int    `json:"completions"`
+	Content     string `json:"content"`
 }
 
 type ScheduledResourceStatus struct {
-	NextRun   string    `json:"nextRun,omitempty"`
-	LastRun   string    `json:"lastRun,omitempty"`
-	Condition Condition `json:"condition,omitempty"`
+	NextRun     string    `json:"nextRun,omitempty"`
+	LastRun     string    `json:"lastRun,omitempty"`
+	Condition   Condition `json:"condition,omitempty"`
+	Completions int       `json:"completions,omitempty"`
 }
 
 func (in *ScheduledResource) IsBeingDeleted() bool {

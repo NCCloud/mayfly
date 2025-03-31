@@ -274,6 +274,51 @@ metadata:
 	}, 60*time.Second, 100*time.Millisecond)
 }
 
+func TestController_ReconcileIntegration_CronScheduleWithCompletions(t *testing.T) {
+	// given
+	var (
+		numOfCompletions  = 2
+		ctx               = context.Background()
+		scheduledResource = &v1alpha2.ScheduledResource{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      strings.ToLower(strings.ReplaceAll(gofakeit.Name(), " ", "")),
+				Namespace: "default",
+			},
+			Spec: v1alpha2.ScheduledResourceSpec{
+				Schedule:    "*/5 * * * * *",
+				Completions: numOfCompletions,
+				Content: `apiVersion: v1
+kind: Secret
+metadata:
+  name: my-resource
+  namespace: default`,
+			},
+		}
+	)
+
+	// when
+	content, contentErr := scheduledResource.GetContent()
+	createErr := testVars.k8sClient.Create(ctx, scheduledResource)
+
+	// then
+	assert.Nil(t, contentErr)
+	assert.Nil(t, createErr)
+	assert.Eventually(t, func() bool {
+		return testVars.k8sClient.Get(ctx, client.ObjectKeyFromObject(content), content) == nil
+	}, 60*time.Second, 100*time.Millisecond)
+
+	assert.Eventually(t, func() bool {
+		testVars.k8sClient.Get(ctx, client.ObjectKeyFromObject(scheduledResource), scheduledResource)
+		return (scheduledResource.Status.Completions == numOfCompletions &&
+			scheduledResource.Status.Condition == v1alpha2.ConditionFinished)
+	}, 60*time.Second, 100*time.Millisecond)
+
+	assert.Never(t, func() bool {
+		testVars.k8sClient.Get(ctx, client.ObjectKeyFromObject(scheduledResource), scheduledResource)
+		return scheduledResource.Status.Completions > numOfCompletions
+	}, 10*time.Second, 100*time.Millisecond)
+}
+
 func TestController_Reconcile_ShouldDeleteTaskWhenNotFound(t *testing.T) {
 	// given
 	var (
