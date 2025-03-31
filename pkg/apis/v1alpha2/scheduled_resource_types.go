@@ -31,6 +31,7 @@ func init() {
 // +kubebuilder:printcolumn:name="Next Run",type=string,JSONPath=".status.nextRun"
 // +kubebuilder:printcolumn:name="Last Run",type=string,JSONPath=".status.lastRun"
 // +kubebuilder:printcolumn:name="Condition",type=string,JSONPath=".status.condition"
+// +kubebuilder:printcolumn:name="Completions",type=string,JSONPath=".status.completions"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
 
 type ScheduledResource struct {
@@ -50,8 +51,9 @@ type ScheduledResourceList struct {
 }
 
 type ScheduledResourceSpec struct {
-	Schedule    string `json:"schedule"`
-	Completions int    `json:"completions"`
+	Schedule string `json:"schedule"`
+	// +kubebuilder:validation:Minimum=1
+	Completions int    `json:"completions,omitempty"`
 	Content     string `json:"content"`
 }
 

@@ -56,13 +56,13 @@ spec:
             type: object
           spec:
             properties:
+              completions:
+                minimum: 1
+                type: integer
               content:
                 type: string
               schedule:
                 type: string
-              completions:
-                type: integer
-                minimum: 1
             required:
             - content
             - schedule

@@ -66,7 +66,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `schedule` _string_ |  |  |  |
-| `completions` _integer_ |  |  |  |
+| `completions` _integer_ |  |  | Minimum: 1 <br /> |
 | `content` _string_ |  |  |  |
 
 
