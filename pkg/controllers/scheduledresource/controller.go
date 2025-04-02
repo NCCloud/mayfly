@@ -55,6 +55,7 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if isOneTimeSchedule && scheduledResource.Status.Condition == v1alpha2.ConditionFinished ||
 		scheduledResource.Spec.Completions > 0 && scheduledResource.Status.Completions >= scheduledResource.Spec.Completions {
+
 		return ctrl.Result{}, nil
 	}
 
@@ -96,6 +97,7 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		scheduledResource.Status.Completions++
 		if scheduledResource.Spec.Completions > 0 &&
 			scheduledResource.Status.Completions >= scheduledResource.Spec.Completions {
+
 			_ = r.scheduler.DeleteTask(tag)
 			scheduledResource.Status.Condition = v1alpha2.ConditionFinished
 			scheduledResource.Status.NextRun = ""
