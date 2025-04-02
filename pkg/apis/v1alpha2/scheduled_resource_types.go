@@ -82,3 +82,8 @@ func (in *ScheduledResource) GetContent() (*unstructured.Unstructured, error) {
 
 	return unstructuredObj, nil
 }
+
+func (in *ScheduledResource) IsCompletionsLimitReached(isOneTimeSchedule bool) bool {
+	return isOneTimeSchedule && in.Status.Completions >= 1 ||
+		in.Spec.Completions > 0 && in.Status.Completions >= in.Spec.Completions
+}
