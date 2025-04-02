@@ -53,7 +53,8 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		scheduledResource.CreationTimestamp, scheduledResource.Spec.Schedule)
 	isOneTimeSchedule := oneTimeScheduleErr == nil
 
-	if scheduledResource.Status.Condition == v1alpha2.ConditionFinished {
+	if isOneTimeSchedule && scheduledResource.Status.Condition == v1alpha2.ConditionFinished ||
+		scheduledResource.Spec.Completions > 0 && scheduledResource.Status.Completions >= scheduledResource.Spec.Completions {
 		return ctrl.Result{}, nil
 	}
 
