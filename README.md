@@ -131,7 +131,7 @@ kind create cluster
 
 ```bash
 export RESOURCES=v1;Secret # Mayfly will begin monitoring secrets in the cluster. For more information, see the configuration section.
-go run .
+go run ./cmd/manager/main.go
 ```
 
 ## 🏷️ Versioning
