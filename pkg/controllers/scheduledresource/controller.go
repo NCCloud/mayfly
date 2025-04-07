@@ -71,14 +71,14 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		if getErr := r.client.Get(context.Background(), client.
 			ObjectKeyFromObject(scheduledResource), scheduledResource); client.IgnoreNotFound(getErr) != nil {
-			logger.Error(contentErr, "Error while getting resource.")
+			logger.Error(getErr, "Error while getting resource.")
 
 			return getErr
 		}
 
 		if createErr := r.client.Create(context.Background(),
 			content); client.IgnoreAlreadyExists(createErr) != nil {
-			logger.Error(contentErr, "An error occurred while creating resource.")
+			logger.Error(createErr, "An error occurred while creating resource.")
 
 			scheduledResource.Status.Condition = v1alpha2.ConditionFailed
 
@@ -114,7 +114,7 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	return ctrl.Result{}, errors2.Join(createOrUpdateErr,
-		r.client.Status().Update(context.Background(), scheduledResource))
+		r.client.Status().Update(ctx, scheduledResource))
 }
 
 func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
