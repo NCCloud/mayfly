@@ -274,6 +274,162 @@ metadata:
 	}, 60*time.Second, 100*time.Millisecond)
 }
 
+func TestController_ReconcileIntegration_CronScheduleWithCompletions(t *testing.T) {
+	// given
+	var (
+		numOfCompletions  = 2
+		ctx               = context.Background()
+		scheduledResource = &v1alpha2.ScheduledResource{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      strings.ToLower(strings.ReplaceAll(gofakeit.Name(), " ", "")),
+				Namespace: "default",
+			},
+			Spec: v1alpha2.ScheduledResourceSpec{
+				Schedule:    "*/3 * * * * *",
+				Completions: numOfCompletions,
+				Content: `apiVersion: v1
+kind: Secret
+metadata:
+  name: my-resource
+  namespace: default`,
+			},
+		}
+	)
+
+	// when
+	content, contentErr := scheduledResource.GetContent()
+	createErr := testVars.k8sClient.Create(ctx, scheduledResource)
+
+	// then
+	assert.Nil(t, contentErr)
+	assert.Nil(t, createErr)
+	assert.Eventually(t, func() bool {
+		return testVars.k8sClient.Get(ctx, client.ObjectKeyFromObject(content), content) == nil
+	}, 30*time.Second, 100*time.Millisecond)
+
+	assert.Eventually(t, func() bool {
+		testVars.k8sClient.Get(ctx, client.ObjectKeyFromObject(scheduledResource), scheduledResource)
+		return scheduledResource.Status.Completions == numOfCompletions &&
+			scheduledResource.Status.Condition == v1alpha2.ConditionFinished
+	}, 30*time.Second, 100*time.Millisecond)
+
+	assert.Never(t, func() bool {
+		testVars.k8sClient.Get(ctx, client.ObjectKeyFromObject(scheduledResource), scheduledResource)
+		return scheduledResource.Status.Completions > numOfCompletions ||
+			scheduledResource.Status.NextRun != "" ||
+			scheduledResource.Status.Condition != v1alpha2.ConditionFinished
+	}, 6*time.Second, 100*time.Millisecond)
+}
+
+func TestController_Reconcile_ShouldReachCompletionsLimit(t *testing.T) {
+	// given
+	var (
+		ctx               = context.Background()
+		mockClient        = new(client2.MockClient)
+		mockStatusClient  = new(client2.MockSubResourceClient)
+		mockScheduler     = new(common2.MockScheduler)
+		controller        = NewController(common.NewConfig(), mockClient, mockScheduler)
+		scheduledResource = &v1alpha2.ScheduledResource{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      gofakeit.Name(),
+				Namespace: gofakeit.Name(),
+			},
+			Spec: v1alpha2.ScheduledResourceSpec{
+				Schedule:    "*/5 * * * * *",
+				Completions: 3,
+				Content: `apiVersion: v1
+kind: Secret
+metadata:
+  name: my-resource
+  namespace: default`,
+			},
+			Status: v1alpha2.ScheduledResourceStatus{
+				Completions: 2,
+			},
+		}
+	)
+
+	mockScheduler.EXPECT().DeleteTask(mock.Anything).Return(nil)
+	mockScheduler.EXPECT().CreateOrUpdateRecurringTask(mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	mockScheduler.EXPECT().GetTaskNextRun(mock.Anything).Return("")
+	mockStatusClient.EXPECT().Update(mock.Anything, mock.Anything).Return(nil)
+	mockClient.EXPECT().Status().Return(mockStatusClient)
+	mockClient.EXPECT().Get(mock.Anything, client.ObjectKeyFromObject(scheduledResource),
+		mock.AnythingOfType("*v1alpha2.ScheduledResource")).RunAndReturn(
+		func(ctx context.Context, key types.NamespacedName, obj client.Object, opts ...client.GetOption) error {
+			scheduledResource.DeepCopyInto(obj.(*v1alpha2.ScheduledResource))
+			return nil
+		})
+	mockClient.EXPECT().Create(mock.Anything, mock.Anything).Return(nil)
+	_, reconcileErr := controller.Reconcile(ctx, ctrl.Request{
+		NamespacedName: client.ObjectKeyFromObject(scheduledResource),
+	})
+
+	// when
+	taskErr := mockScheduler.Calls[0].Arguments[2].(func() error)()
+
+	// then
+	mockScheduler.AssertCalled(t, "DeleteTask", fmt.Sprintf("v1alpha2/ScheduledResource/%s/%s/create",
+		scheduledResource.Name, scheduledResource.Namespace))
+	mockClient.AssertCalled(t, "Create", mock.Anything, mock.Anything)
+	mockStatusClient.AssertCalled(t, "Update", mock.Anything, mock.MatchedBy(func(obj client.Object) bool {
+		resource := obj.(*v1alpha2.ScheduledResource)
+		return resource.Status.Condition == v1alpha2.ConditionFinished &&
+			resource.Status.Completions == 3 &&
+			resource.Status.NextRun == ""
+	}))
+	assert.Nil(t, reconcileErr)
+	assert.Nil(t, taskErr)
+}
+
+func TestController_Reconcile_SkipReconcileWhenCompletionsLimitReached(t *testing.T) {
+	// given
+	var (
+		ctx               = context.Background()
+		mockClient        = new(client2.MockClient)
+		mockStatusClient  = new(client2.MockSubResourceClient)
+		mockScheduler     = new(common2.MockScheduler)
+		controller        = NewController(common.NewConfig(), mockClient, mockScheduler)
+		scheduledResource = &v1alpha2.ScheduledResource{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      gofakeit.Name(),
+				Namespace: gofakeit.Name(),
+			},
+			Spec: v1alpha2.ScheduledResourceSpec{
+				Schedule:    "*/5 * * * * *",
+				Completions: 3,
+				Content: `apiVersion: v1
+kind: Secret
+metadata:
+  name: my-resource
+  namespace: default`,
+			},
+			Status: v1alpha2.ScheduledResourceStatus{
+				Completions: 3,
+			},
+		}
+	)
+
+	mockClient.EXPECT().Status().Return(mockStatusClient)
+	mockClient.EXPECT().Get(mock.Anything, client.ObjectKeyFromObject(scheduledResource),
+		mock.AnythingOfType("*v1alpha2.ScheduledResource")).RunAndReturn(
+		func(ctx context.Context, key types.NamespacedName, obj client.Object, opts ...client.GetOption) error {
+			scheduledResource.DeepCopyInto(obj.(*v1alpha2.ScheduledResource))
+			return nil
+		})
+
+	// when
+	result, reconcileErr := controller.Reconcile(ctx, ctrl.Request{
+		NamespacedName: client.ObjectKeyFromObject(scheduledResource),
+	})
+
+	// then
+	mockScheduler.AssertNotCalled(t, "CreateOrUpdateRecurringTask")
+	mockScheduler.AssertNotCalled(t, "Update")
+	assert.Nil(t, reconcileErr)
+	assert.False(t, result.Requeue)
+}
+
 func TestController_Reconcile_ShouldDeleteTaskWhenNotFound(t *testing.T) {
 	// given
 	var (
