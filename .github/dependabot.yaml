@@ -7,8 +7,6 @@ updates:
       time: "12:00"
       interval: "weekly"
       timezone: "Europe/Rome"
-    reviewers:
-      - "yunussandikci"
   - package-ecosystem: docker
     directory: /
     schedule:
@@ -16,5 +14,3 @@ updates:
       time: "12:00"
       interval: "weekly"
       timezone: "Europe/Rome"
-    reviewers:
-      - "yunussandikci"
