@@ -66,6 +66,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `schedule` _string_ |  |  |  |
+| `completions` _integer_ |  |  | Minimum: 1 <br /> |
 | `content` _string_ |  |  |  |
 
 
@@ -85,5 +86,6 @@ _Appears in:_
 | `nextRun` _string_ |  |  |  |
 | `lastRun` _string_ |  |  |  |
 | `condition` _[Condition](#condition)_ |  |  |  |
+| `completions` _integer_ |  |  |  |
 
 
