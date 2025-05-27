@@ -31,6 +31,7 @@ func init() {
 // +kubebuilder:printcolumn:name="Next Run",type=string,JSONPath=".status.nextRun"
 // +kubebuilder:printcolumn:name="Last Run",type=string,JSONPath=".status.lastRun"
 // +kubebuilder:printcolumn:name="Condition",type=string,JSONPath=".status.condition"
+// +kubebuilder:printcolumn:name="Completions",type=string,JSONPath=".status.completions"
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=".metadata.creationTimestamp"
 
 type ScheduledResource struct {
@@ -51,13 +52,16 @@ type ScheduledResourceList struct {
 
 type ScheduledResourceSpec struct {
 	Schedule string `json:"schedule"`
-	Content  string `json:"content"`
+	// +kubebuilder:validation:Minimum=1
+	Completions int    `json:"completions,omitempty"`
+	Content     string `json:"content"`
 }
 
 type ScheduledResourceStatus struct {
-	NextRun   string    `json:"nextRun,omitempty"`
-	LastRun   string    `json:"lastRun,omitempty"`
-	Condition Condition `json:"condition,omitempty"`
+	NextRun     string    `json:"nextRun,omitempty"`
+	LastRun     string    `json:"lastRun,omitempty"`
+	Condition   Condition `json:"condition,omitempty"`
+	Completions int       `json:"completions,omitempty"`
 }
 
 func (in *ScheduledResource) IsBeingDeleted() bool {
@@ -77,4 +81,9 @@ func (in *ScheduledResource) GetContent() (*unstructured.Unstructured, error) {
 	}
 
 	return unstructuredObj, nil
+}
+
+func (in *ScheduledResource) IsCompletionsLimitReached(isOneTimeSchedule bool) bool {
+	return isOneTimeSchedule && in.Status.Completions >= 1 ||
+		in.Spec.Completions > 0 && in.Status.Completions >= in.Spec.Completions
 }

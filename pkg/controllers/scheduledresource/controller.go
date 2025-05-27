@@ -53,7 +53,7 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		scheduledResource.CreationTimestamp, scheduledResource.Spec.Schedule)
 	isOneTimeSchedule := oneTimeScheduleErr == nil
 
-	if isOneTimeSchedule && scheduledResource.Status.Condition == v1alpha2.ConditionFinished {
+	if scheduledResource.IsCompletionsLimitReached(isOneTimeSchedule) {
 		return ctrl.Result{}, nil
 	}
 
@@ -87,12 +87,15 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		logger.Info(fmt.Sprintf("Task %s finished.", tag))
 
-		if isOneTimeSchedule {
+		scheduledResource.Status.Completions++
+		if scheduledResource.IsCompletionsLimitReached(isOneTimeSchedule) {
 			_ = r.scheduler.DeleteTask(tag)
 			scheduledResource.Status.Condition = v1alpha2.ConditionFinished
+			scheduledResource.Status.NextRun = ""
+		} else {
+			scheduledResource.Status.NextRun = r.scheduler.GetTaskNextRun(tag)
 		}
 
-		scheduledResource.Status.NextRun = r.scheduler.GetTaskNextRun(tag)
 		scheduledResource.Status.LastRun = time.Now().Format(time.RFC3339)
 
 		return r.client.Status().Update(context.Background(), scheduledResource)
