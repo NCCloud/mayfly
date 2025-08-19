@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	time "time"
 
 	"github.com/NCCloud/mayfly/pkg/common"
@@ -20,7 +21,7 @@ func (b *Benchmark) Start() {
 }
 
 func (b *Benchmark) CreateResources() {
-	fmt.Println("Creating resources")
+	log.Println("Creating resources")
 }
 
 func (b *Benchmark) Listener() Result {
@@ -29,6 +30,7 @@ func (b *Benchmark) Listener() Result {
 	for {
 		kind := make(map[string]int)
 		now := time.Now()
+
 		for _, resourceKind := range b.config.Resources {
 			resourceList := common.NewResourceInstanceList(resourceKind)
 
@@ -36,14 +38,16 @@ func (b *Benchmark) Listener() Result {
 			if resourcesListErr != nil {
 				panic(resourcesListErr)
 			}
+
 			for _, resource := range resourceList.Items {
 				if resource.GetAnnotations()[b.config.ExpirationLabel] == "" {
 					continue
 				}
+
 				kind[resourceKind]++
 			}
-
 		}
+
 		result.Points = append(result.Points, Point{
 			time: now,
 			kind: kind,
@@ -55,6 +59,7 @@ func (b *Benchmark) Listener() Result {
 		if time.Since(b.startedAt) > 60*time.Minute {
 			break
 		}
+
 		time.Sleep(b.granularity)
 	}
 
@@ -62,18 +67,20 @@ func (b *Benchmark) Listener() Result {
 }
 
 func (b *Benchmark) createSecrets() {
-	for i := 0; i < b.count; i++ {
-		id := i + b.offset
-		secret := b.generateSecret(id)
+	for i := range b.count {
+		secretId := i + b.offset
+		secret := b.generateSecret(secretId)
+
 		createErr := mgrClient.Create(context.Background(), secret)
 		if createErr != nil {
-			fmt.Println(createErr)
+			log.Println(createErr)
 		}
 
-		fmt.Printf("\nSecret %d has been created.", id)
+		log.Printf("\nSecret %d has been created.", secretId)
 		time.Sleep(b.delay)
 	}
-	fmt.Printf("\n")
+
+	log.Printf("\n")
 }
 
 func (b *Benchmark) generateSecret(id int) *v1.Secret {

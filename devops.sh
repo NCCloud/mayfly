@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-export CONTROLLER_GEN_VERSION="v0.17.2"
-export GOLANGCI_LINT_VERSION="v1.64.5"
-export MOCKERY_GEN_VERSION="v2.52.2"
-export GOFUMPT_VERSION="v0.7.0"
+export CONTROLLER_GEN_VERSION="v0.18.0"
+export GOLANGCI_LINT_VERSION="v2.4.0"
+export MOCKERY_GEN_VERSION="v3.5.3"
+export GOFUMPT_VERSION="v0.8.0"
 export TESTENV_VERSION="1.25.x!"
 
 prerequisites() {
@@ -11,7 +11,7 @@ prerequisites() {
     go install sigs.k8s.io/controller-tools/cmd/controller-gen@"${CONTROLLER_GEN_VERSION}"
   fi
   if [[ "$(golangci-lint --version 2>&1)" != *"$GOLANGCI_LINT_VERSION"* ]]; then
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@"${GOLANGCI_LINT_VERSION}"
+    go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@"${GOLANGCI_LINT_VERSION}"
   fi
   if [[ "$(mockery --version 2>&1)" != *"$MOCKERY_GEN_VERSION"* ]]; then
     go install github.com/vektra/mockery/v2@"${MOCKERY_GEN_VERSION}"
