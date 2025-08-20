@@ -26,12 +26,15 @@ var (
 )
 
 func init() {
-	scheme := runtime.NewScheme()
+	var (
+		scheme       = runtime.NewScheme()
+		mgrClientErr error
+	)
+
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	config = common.NewConfig()
 
-	var mgrClientErr error
 	mgrClient, mgrClientErr = client.New(ctrl.GetConfigOrDie(), client.Options{Scheme: scheme})
 	if mgrClientErr != nil {
 		panic(mgrClientErr)
@@ -39,50 +42,61 @@ func init() {
 }
 
 func main() {
-	benchmark := NewBenchmark(mgrClient, config, 10000).
-		Delay(0)
-
+	itemCount := 1000
+	benchmark := NewBenchmark(mgrClient, config, itemCount).Delay(0)
 	benchmark.Start()
 
-	f, _ := os.Create(benchmarkHtml)
-	_, writeStringErr := f.WriteString(" <meta http-equiv=\"refresh\" content=\"6\" />\nWaiting for Mayfly benchmark to start...")
+	benchmarkFile, _ := os.Create(benchmarkHtml)
+
+	_, writeStringErr := benchmarkFile.WriteString(" <meta http-equiv=\"refresh\" content=\"6\" />\nWaiting for Mayfly benchmark to start...")
 	if writeStringErr != nil {
 		panic(writeStringErr)
 	}
-	openFilErr := browser.OpenFile(f.Name())
+
+	openFilErr := browser.OpenFile(benchmarkFile.Name())
 	if openFilErr != nil {
 		panic(openFilErr)
 	}
 
 	for {
-		time.Sleep(5 * time.Second)
-		result := benchmark.GetResult()
-		var durations []string
-		data := map[string][]opts.LineData{}
+		var (
+			waitTimeSecond = 5
+			result         = benchmark.GetResult()
+			durations      []string
+			data           = map[string][]opts.LineData{}
+		)
+
+		time.Sleep(time.Duration(waitTimeSecond) * time.Second)
+
 		for _, point := range result.Points {
 			durations = append(durations, fmt.Sprintf("%.0fs", point.time.Sub(result.StartedAt).Seconds()))
+
 			for _, resource := range config.Resources {
 				data[resource] = append(data[resource], opts.LineData{Name: resource, Value: point.kind[resource]})
 			}
 		}
-		Render(CreateChart(durations, data))
 
+		Render(CreateChart(durations, data))
 	}
 }
 
 func Render(chart *charts.Line) {
-	f, _ := os.Create(benchmarkHtml)
-	_, writeStringErr := f.WriteString(" <meta http-equiv=\"refresh\" content=\"6\" />")
+	benchFile, _ := os.Create(benchmarkHtml)
+
+	_, writeStringErr := benchFile.WriteString(" <meta http-equiv=\"refresh\" content=\"6\" />")
 	if writeStringErr != nil {
 		panic(writeStringErr)
 	}
-	renderErr := chart.Render(f)
+
+	renderErr := chart.Render(benchFile)
 	if renderErr != nil {
 		panic(renderErr)
 	}
 }
 
 func CreateChart(xAxis []string, yzAxis map[string][]opts.LineData) *charts.Line {
+	var chartAreaOpacity float32 = 0.2
+
 	line := charts.NewLine()
 	line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
 		Title: pageTitle,
@@ -94,11 +108,13 @@ func CreateChart(xAxis []string, yzAxis map[string][]opts.LineData) *charts.Line
 		Height:    "800px",
 		Theme:     "infographic",
 	}))
+
 	line.SetXAxis(xAxis)
+
 	for kind, value := range yzAxis {
 		line.AddSeries(kind, value).SetSeriesOptions(
 			charts.WithAreaStyleOpts(opts.AreaStyle{
-				Opacity: 0.2,
+				Opacity: opts.Float(chartAreaOpacity),
 			}),
 			charts.WithLineChartOpts(opts.LineChart{
 				Smooth: opts.Bool(false),
@@ -107,5 +123,6 @@ func CreateChart(xAxis []string, yzAxis map[string][]opts.LineData) *charts.Line
 				opts.MarkPointStyle{Label: &opts.Label{Show: opts.Bool(true)}}),
 		)
 	}
+
 	return line
 }

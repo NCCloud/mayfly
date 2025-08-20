@@ -30,8 +30,10 @@ type Point struct {
 }
 
 func NewBenchmark(mgrClient client.Client, config *common.Config, count int) *Benchmark {
+	granularityInSeconds := 5
+
 	return &Benchmark{
-		granularity: 5 * time.Second,
+		granularity: time.Duration(granularityInSeconds) * time.Second,
 		config:      config,
 		mgrClient:   mgrClient,
 		count:       count,
@@ -42,15 +44,18 @@ func NewBenchmark(mgrClient client.Client, config *common.Config, count int) *Be
 
 func (b *Benchmark) Granularity(granularity time.Duration) *Benchmark {
 	b.granularity = granularity
+
 	return b
 }
 
 func (b *Benchmark) Offset(offset int) *Benchmark {
 	b.offset = offset
+
 	return b
 }
 
 func (b *Benchmark) Delay(delay time.Duration) *Benchmark {
 	b.delay = delay
+
 	return b
 }

@@ -46,7 +46,8 @@ type ScheduledResource struct {
 type ScheduledResourceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ScheduledResource `json:"items"`
+
+	Items []ScheduledResource `json:"items"`
 }
 
 type ScheduledResourceSpec struct {
