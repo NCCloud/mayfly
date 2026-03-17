@@ -62,7 +62,7 @@ func main() {
 		var (
 			waitTimeSecond = 5
 			result         = benchmark.GetResult()
-			durations      []string
+			durations      = make([]string, 0, len(result.Points))
 			data           = map[string][]opts.LineData{}
 		)
 
