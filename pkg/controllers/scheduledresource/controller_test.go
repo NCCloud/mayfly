@@ -5,6 +5,7 @@ import (
 	errors2 "errors"
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -21,6 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,6 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 var testVars = struct {
@@ -482,4 +485,25 @@ func TestController_SetupWithManager(t *testing.T) {
 	// then
 	assert.Nil(t, addToSchemeErr)
 	assert.Nil(t, setupErr)
+}
+
+func TestController_ControllerOptions_RateLimitsAcrossKeys(t *testing.T) {
+	// given
+	controller := NewController(common.NewConfig(), nil, nil)
+
+	// when
+	options := controller.controllerOptions()
+
+	// then
+	require.NotNil(t, options.RateLimiter)
+
+	var maxDelay time.Duration
+
+	for i := range 200 {
+		maxDelay = max(maxDelay, options.RateLimiter.When(reconcile.Request{
+			NamespacedName: types.NamespacedName{Namespace: "default", Name: strconv.Itoa(i)},
+		}))
+	}
+
+	assert.Greater(t, maxDelay, time.Second)
 }
