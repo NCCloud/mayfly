@@ -5,6 +5,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 )
 
@@ -22,7 +23,11 @@ const (
 var ErrObjectIsNotValid = errors.New("object is not valid")
 
 func init() {
-	SchemeBuilder.Register(&ScheduledResource{}, &ScheduledResourceList{})
+	SchemeBuilder.Register(func(scheme *runtime.Scheme) error {
+		scheme.AddKnownTypes(GroupVersion, &ScheduledResource{}, &ScheduledResourceList{})
+
+		return nil
+	})
 }
 
 // +kubebuilder:object:root=true
