@@ -172,7 +172,7 @@ func TestController_Reconcile(t *testing.T) {
 		return obj.(*v1alpha2.ScheduledResource).Status.Condition == v1alpha2.ConditionScheduled
 	}))
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_ReconcileIntegration_DurationSchedule(t *testing.T) {
@@ -302,7 +302,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenNotFound(t *testing.T) {
 	mockScheduler.AssertCalled(t, "DeleteTask", fmt.Sprintf("v1alpha2/ScheduledResource/%s/%s/create",
 		"my-secret", "my-namespace"))
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_Reconcile_ShouldReturnErrWhenInFieldDoesNotMakeSense(t *testing.T) {
@@ -343,7 +343,7 @@ func TestController_Reconcile_ShouldReturnErrWhenInFieldDoesNotMakeSense(t *test
 
 	// then
 	assert.NotNil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 	mockStatusClient.AssertCalled(t, "Update", mock.Anything, mock.MatchedBy(func(obj client.Object) bool {
 		return obj.(*v1alpha2.ScheduledResource).Status.Condition == v1alpha2.ConditionFailed
 	}))

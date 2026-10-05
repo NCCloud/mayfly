@@ -177,7 +177,7 @@ func TestController_Reconcile(t *testing.T) {
 	mockScheduler.AssertCalled(t, "CreateOrUpdateOneTimeTask",
 		"v1/Secret/my-secret/my-namespace/delete", date, mock.Anything)
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_ReconcileIntegration(t *testing.T) {
@@ -238,7 +238,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenNotFound(t *testing.T) {
 	// then
 	mockScheduler.AssertCalled(t, "DeleteTask", "v1/Secret/my-secret/my-namespace/delete")
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_Reconcile_ShouldDeleteTaskWhenAnnotationNotFound(t *testing.T) {
@@ -285,7 +285,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenAnnotationNotFound(t *testing.
 	// then
 	mockScheduler.AssertCalled(t, "DeleteTask", "v1/Secret/my-secret/my-namespace/delete")
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_Reconcile_ShouldReturnErrWhenAnnotationValueDoesNotMakeSense(t *testing.T) {
@@ -330,7 +330,7 @@ func TestController_Reconcile_ShouldReturnErrWhenAnnotationValueDoesNotMakeSense
 
 	// then
 	assert.NotNil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_Reconcile_ShouldDeleteTaskWhenAnnotationValueIsPast(t *testing.T) {
@@ -379,7 +379,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenAnnotationValueIsPast(t *testi
 	// then
 	mockClient.AssertCalled(t, "Delete", mock.Anything, secret)
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_SetupWithManager(t *testing.T) {
