@@ -19,6 +19,7 @@ linters:
     - wrapcheck
     - revive
     - noinlineerr
+    - exhaustruct_v5
   settings:
     cyclop:
       max-complexity: 12
