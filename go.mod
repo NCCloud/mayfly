@@ -7,7 +7,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/elliotchance/pie/v2 v2.9.1
-	github.com/go-co-op/gocron/v2 v2.22.0
+	github.com/go-co-op/gocron/v2 v2.16.3 // pinned: newer releases drop (v2.22) or hang (v2.18.1-v2.21) a one-time job whose start passes during registration
 	github.com/go-echarts/go-echarts/v2 v2.7.3
 	github.com/go-logr/logr v1.4.4
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c

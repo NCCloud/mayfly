@@ -26,8 +26,8 @@ github.com/fsnotify/fsnotify v1.10.1 h1:b0/UzAf9yR5rhf3RPm9gf3ehBPpf0oZKIjtpKrx5
 github.com/fsnotify/fsnotify v1.10.1/go.mod h1:TLheqan6HD6GBK6PrDWyDPBaEV8LspOxvPSjC+bVfgo=
 github.com/fxamacker/cbor/v2 v2.9.4 h1:xwjVlxEMR3S605oUlgBjKLTTeGFciYPGYCtF/35LKGo=
 github.com/fxamacker/cbor/v2 v2.9.4/go.mod h1:vM4b+DJCtHn+zz7h3FFp/hDAI9WNWCsZj23V5ytsSxQ=
-github.com/go-co-op/gocron/v2 v2.22.0 h1:uEuH2F7k7VoESb1BYSaffuuV+T0kkpzsC0aXk7/z79I=
-github.com/go-co-op/gocron/v2 v2.22.0/go.mod h1:hiH/U9RMhTi1BBZJmef9s3KC9QwhpBF6PFrvUKaXY9M=
+github.com/go-co-op/gocron/v2 v2.16.3 h1:kYqukZqBa8RC2+AFAHnunmKcs9GRTjwBo8WRF3I6cbI=
+github.com/go-co-op/gocron/v2 v2.16.3/go.mod h1:aTf7/+5Jo2E+cyAqq625UQ6DzpkV96b22VHIUAt6l3c=
 github.com/go-echarts/go-echarts/v2 v2.7.3 h1:WEZEptOHVub2F11mzUlmTbk7i+yVSrL7rwpZi8F/1kY=
 github.com/go-echarts/go-echarts/v2 v2.7.3/go.mod h1:Z+spPygZRIEyqod69r0WMnkN5RV3MwhYDtw601w3G8w=
 github.com/go-logr/logr v1.4.4 h1:tG4xh9yMsRCAiodLVTxyrkzSZ9+o0L1Kg/+cPVcbP/8=
