@@ -47,7 +47,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `cloud.namecheap.com/v1alpha2` | | |
 | `kind` _string_ | `ScheduledResource` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[ScheduledResourceSpec](#scheduledresourcespec)_ |  |  |  |
 | `status` _[ScheduledResourceStatus](#scheduledresourcestatus)_ |  |  |  |
 

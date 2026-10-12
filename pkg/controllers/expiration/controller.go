@@ -8,10 +8,13 @@ import (
 	"github.com/NCCloud/mayfly/pkg/common"
 	"github.com/go-co-op/gocron/v2"
 	errors2 "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/util/workqueue"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 type Controller struct {
@@ -78,6 +81,14 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(fmt.Sprintf("Expiration/%s", r.apiVersionKind)).
+		WithOptions(r.controllerOptions()).
 		For(common.NewResourceInstance(r.apiVersionKind)).
 		Complete(r)
+}
+
+func (r *Controller) controllerOptions() controller.Options {
+	return controller.Options{
+		// Keeps the overall 10 qps retry limit: every retry of an expired object sends its DELETE to the API server again.
+		RateLimiter: workqueue.DefaultTypedControllerRateLimiter[reconcile.Request](),
+	}
 }

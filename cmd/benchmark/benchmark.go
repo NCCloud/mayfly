@@ -9,7 +9,6 @@ import (
 	"github.com/NCCloud/mayfly/pkg/common"
 
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var result = Result{}
@@ -85,12 +84,10 @@ func (b *Benchmark) createSecrets() {
 
 func (b *Benchmark) generateSecret(id int) *v1.Secret {
 	return &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("benchmark-%d", id),
-			Namespace: "default",
-			Annotations: map[string]string{
-				b.config.ExpirationLabel: "10s",
-			},
+		Name:      fmt.Sprintf("benchmark-%d", id),
+		Namespace: "default",
+		Annotations: map[string]string{
+			b.config.ExpirationLabel: "10s",
 		},
 		Data: map[string][]byte{
 			"password": []byte("password"),

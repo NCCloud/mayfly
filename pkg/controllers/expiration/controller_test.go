@@ -3,6 +3,7 @@ package expiration
 import (
 	"context"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"github.com/araddon/dateparse"
 	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,6 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/NCCloud/mayfly/pkg/common"
 	"github.com/stretchr/testify/assert"
@@ -174,7 +177,7 @@ func TestController_Reconcile(t *testing.T) {
 	mockScheduler.AssertCalled(t, "CreateOrUpdateOneTimeTask",
 		"v1/Secret/my-secret/my-namespace/delete", date, mock.Anything)
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_ReconcileIntegration(t *testing.T) {
@@ -235,7 +238,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenNotFound(t *testing.T) {
 	// then
 	mockScheduler.AssertCalled(t, "DeleteTask", "v1/Secret/my-secret/my-namespace/delete")
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_Reconcile_ShouldDeleteTaskWhenAnnotationNotFound(t *testing.T) {
@@ -282,7 +285,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenAnnotationNotFound(t *testing.
 	// then
 	mockScheduler.AssertCalled(t, "DeleteTask", "v1/Secret/my-secret/my-namespace/delete")
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_Reconcile_ShouldReturnErrWhenAnnotationValueDoesNotMakeSense(t *testing.T) {
@@ -327,7 +330,7 @@ func TestController_Reconcile_ShouldReturnErrWhenAnnotationValueDoesNotMakeSense
 
 	// then
 	assert.NotNil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_Reconcile_ShouldDeleteTaskWhenAnnotationValueIsPast(t *testing.T) {
@@ -376,7 +379,7 @@ func TestController_Reconcile_ShouldDeleteTaskWhenAnnotationValueIsPast(t *testi
 	// then
 	mockClient.AssertCalled(t, "Delete", mock.Anything, secret)
 	assert.Nil(t, reconcileErr)
-	assert.False(t, result.Requeue)
+	assert.Equal(t, ctrl.Result{}, result)
 }
 
 func TestController_SetupWithManager(t *testing.T) {
@@ -406,4 +409,25 @@ func TestController_SetupWithManager(t *testing.T) {
 
 	// then
 	assert.Nil(t, setupErr)
+}
+
+func TestController_ControllerOptions_RateLimitsAcrossKeys(t *testing.T) {
+	// given
+	controller := NewController(common.NewConfig(), nil, testVars.apiVersionKind, nil)
+
+	// when
+	options := controller.controllerOptions()
+
+	// then
+	require.NotNil(t, options.RateLimiter)
+
+	var maxDelay time.Duration
+
+	for i := range 200 {
+		maxDelay = max(maxDelay, options.RateLimiter.When(reconcile.Request{
+			NamespacedName: types.NamespacedName{Namespace: "default", Name: strconv.Itoa(i)},
+		}))
+	}
+
+	assert.Greater(t, maxDelay, time.Second)
 }

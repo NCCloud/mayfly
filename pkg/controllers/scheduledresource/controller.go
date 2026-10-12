@@ -9,10 +9,13 @@ import (
 	"github.com/NCCloud/mayfly/pkg/apis/v1alpha2"
 	"github.com/NCCloud/mayfly/pkg/common"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/util/workqueue"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 type Controller struct {
@@ -120,6 +123,14 @@ func (r *Controller) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 func (r *Controller) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("ScheduledResource").
+		WithOptions(r.controllerOptions()).
 		For(&v1alpha2.ScheduledResource{}).
 		Complete(r)
+}
+
+func (r *Controller) controllerOptions() controller.Options {
+	return controller.Options{
+		// Keeps the overall 10 qps retry limit: every retry writes the status again, and an invalid schedule fails every time.
+		RateLimiter: workqueue.DefaultTypedControllerRateLimiter[reconcile.Request](),
+	}
 }

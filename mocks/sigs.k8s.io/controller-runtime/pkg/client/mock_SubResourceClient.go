@@ -8,6 +8,7 @@ import (
 	"context"
 
 	mock "github.com/stretchr/testify/mock"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -17,10 +18,19 @@ func NewMockSubResourceClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockSubResourceClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockSubResourceClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -36,6 +46,78 @@ type MockSubResourceClient_Expecter struct {
 
 func (_m *MockSubResourceClient) EXPECT() *MockSubResourceClient_Expecter {
 	return &MockSubResourceClient_Expecter{mock: &_m.Mock}
+}
+
+// Apply provides a mock function for the type MockSubResourceClient
+func (_mock *MockSubResourceClient) Apply(ctx context.Context, obj runtime.ApplyConfiguration, opts ...client.SubResourceApplyOption) error {
+	var tmpRet mock.Arguments
+	if len(opts) > 0 {
+		tmpRet = _mock.Called(ctx, obj, opts)
+	} else {
+		tmpRet = _mock.Called(ctx, obj)
+	}
+	ret := tmpRet
+
+	if len(ret) == 0 {
+		panic("no return value specified for Apply")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, runtime.ApplyConfiguration, ...client.SubResourceApplyOption) error); ok {
+		r0 = returnFunc(ctx, obj, opts...)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockSubResourceClient_Apply_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Apply'
+type MockSubResourceClient_Apply_Call struct {
+	*mock.Call
+}
+
+// Apply is a helper method to define mock.On call
+//   - ctx context.Context
+//   - obj runtime.ApplyConfiguration
+//   - opts ...client.SubResourceApplyOption
+func (_e *MockSubResourceClient_Expecter) Apply(ctx any, obj any, opts ...any) *MockSubResourceClient_Apply_Call {
+	return &MockSubResourceClient_Apply_Call{Call: _e.mock.On("Apply",
+		append([]any{ctx, obj}, opts...)...)}
+}
+
+func (_c *MockSubResourceClient_Apply_Call) Run(run func(ctx context.Context, obj runtime.ApplyConfiguration, opts ...client.SubResourceApplyOption)) *MockSubResourceClient_Apply_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 runtime.ApplyConfiguration
+		if args[1] != nil {
+			arg1 = args[1].(runtime.ApplyConfiguration)
+		}
+		var arg2 []client.SubResourceApplyOption
+		var variadicArgs []client.SubResourceApplyOption
+		if len(args) > 2 {
+			variadicArgs = args[2].([]client.SubResourceApplyOption)
+		}
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
+	})
+	return _c
+}
+
+func (_c *MockSubResourceClient_Apply_Call) Return(err error) *MockSubResourceClient_Apply_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockSubResourceClient_Apply_Call) RunAndReturn(run func(ctx context.Context, obj runtime.ApplyConfiguration, opts ...client.SubResourceApplyOption) error) *MockSubResourceClient_Apply_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // Create provides a mock function for the type MockSubResourceClient
@@ -71,9 +153,9 @@ type MockSubResourceClient_Create_Call struct {
 //   - obj client.Object
 //   - subResource client.Object
 //   - opts ...client.SubResourceCreateOption
-func (_e *MockSubResourceClient_Expecter) Create(ctx interface{}, obj interface{}, subResource interface{}, opts ...interface{}) *MockSubResourceClient_Create_Call {
+func (_e *MockSubResourceClient_Expecter) Create(ctx any, obj any, subResource any, opts ...any) *MockSubResourceClient_Create_Call {
 	return &MockSubResourceClient_Create_Call{Call: _e.mock.On("Create",
-		append([]interface{}{ctx, obj, subResource}, opts...)...)}
+		append([]any{ctx, obj, subResource}, opts...)...)}
 }
 
 func (_c *MockSubResourceClient_Create_Call) Run(run func(ctx context.Context, obj client.Object, subResource client.Object, opts ...client.SubResourceCreateOption)) *MockSubResourceClient_Create_Call {
@@ -149,9 +231,9 @@ type MockSubResourceClient_Get_Call struct {
 //   - obj client.Object
 //   - subResource client.Object
 //   - opts ...client.SubResourceGetOption
-func (_e *MockSubResourceClient_Expecter) Get(ctx interface{}, obj interface{}, subResource interface{}, opts ...interface{}) *MockSubResourceClient_Get_Call {
+func (_e *MockSubResourceClient_Expecter) Get(ctx any, obj any, subResource any, opts ...any) *MockSubResourceClient_Get_Call {
 	return &MockSubResourceClient_Get_Call{Call: _e.mock.On("Get",
-		append([]interface{}{ctx, obj, subResource}, opts...)...)}
+		append([]any{ctx, obj, subResource}, opts...)...)}
 }
 
 func (_c *MockSubResourceClient_Get_Call) Run(run func(ctx context.Context, obj client.Object, subResource client.Object, opts ...client.SubResourceGetOption)) *MockSubResourceClient_Get_Call {
@@ -227,9 +309,9 @@ type MockSubResourceClient_Patch_Call struct {
 //   - obj client.Object
 //   - patch client.Patch
 //   - opts ...client.SubResourcePatchOption
-func (_e *MockSubResourceClient_Expecter) Patch(ctx interface{}, obj interface{}, patch interface{}, opts ...interface{}) *MockSubResourceClient_Patch_Call {
+func (_e *MockSubResourceClient_Expecter) Patch(ctx any, obj any, patch any, opts ...any) *MockSubResourceClient_Patch_Call {
 	return &MockSubResourceClient_Patch_Call{Call: _e.mock.On("Patch",
-		append([]interface{}{ctx, obj, patch}, opts...)...)}
+		append([]any{ctx, obj, patch}, opts...)...)}
 }
 
 func (_c *MockSubResourceClient_Patch_Call) Run(run func(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.SubResourcePatchOption)) *MockSubResourceClient_Patch_Call {
@@ -304,9 +386,9 @@ type MockSubResourceClient_Update_Call struct {
 //   - ctx context.Context
 //   - obj client.Object
 //   - opts ...client.SubResourceUpdateOption
-func (_e *MockSubResourceClient_Expecter) Update(ctx interface{}, obj interface{}, opts ...interface{}) *MockSubResourceClient_Update_Call {
+func (_e *MockSubResourceClient_Expecter) Update(ctx any, obj any, opts ...any) *MockSubResourceClient_Update_Call {
 	return &MockSubResourceClient_Update_Call{Call: _e.mock.On("Update",
-		append([]interface{}{ctx, obj}, opts...)...)}
+		append([]any{ctx, obj}, opts...)...)}
 }
 
 func (_c *MockSubResourceClient_Update_Call) Run(run func(ctx context.Context, obj client.Object, opts ...client.SubResourceUpdateOption)) *MockSubResourceClient_Update_Call {

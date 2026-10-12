@@ -16,10 +16,19 @@ func NewMockScheduler(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockScheduler {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockScheduler{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -63,7 +72,7 @@ type MockScheduler_CreateOrUpdateOneTimeTask_Call struct {
 //   - tag string
 //   - at time.Time
 //   - task func() error
-func (_e *MockScheduler_Expecter) CreateOrUpdateOneTimeTask(tag interface{}, at interface{}, task interface{}) *MockScheduler_CreateOrUpdateOneTimeTask_Call {
+func (_e *MockScheduler_Expecter) CreateOrUpdateOneTimeTask(tag any, at any, task any) *MockScheduler_CreateOrUpdateOneTimeTask_Call {
 	return &MockScheduler_CreateOrUpdateOneTimeTask_Call{Call: _e.mock.On("CreateOrUpdateOneTimeTask", tag, at, task)}
 }
 
@@ -126,7 +135,7 @@ type MockScheduler_CreateOrUpdateRecurringTask_Call struct {
 //   - tag string
 //   - cron string
 //   - task func() error
-func (_e *MockScheduler_Expecter) CreateOrUpdateRecurringTask(tag interface{}, cron interface{}, task interface{}) *MockScheduler_CreateOrUpdateRecurringTask_Call {
+func (_e *MockScheduler_Expecter) CreateOrUpdateRecurringTask(tag any, cron any, task any) *MockScheduler_CreateOrUpdateRecurringTask_Call {
 	return &MockScheduler_CreateOrUpdateRecurringTask_Call{Call: _e.mock.On("CreateOrUpdateRecurringTask", tag, cron, task)}
 }
 
@@ -187,7 +196,7 @@ type MockScheduler_DeleteTask_Call struct {
 
 // DeleteTask is a helper method to define mock.On call
 //   - tag string
-func (_e *MockScheduler_Expecter) DeleteTask(tag interface{}) *MockScheduler_DeleteTask_Call {
+func (_e *MockScheduler_Expecter) DeleteTask(tag any) *MockScheduler_DeleteTask_Call {
 	return &MockScheduler_DeleteTask_Call{Call: _e.mock.On("DeleteTask", tag)}
 }
 
@@ -238,7 +247,7 @@ type MockScheduler_GetTaskNextRun_Call struct {
 
 // GetTaskNextRun is a helper method to define mock.On call
 //   - tag string
-func (_e *MockScheduler_Expecter) GetTaskNextRun(tag interface{}) *MockScheduler_GetTaskNextRun_Call {
+func (_e *MockScheduler_Expecter) GetTaskNextRun(tag any) *MockScheduler_GetTaskNextRun_Call {
 	return &MockScheduler_GetTaskNextRun_Call{Call: _e.mock.On("GetTaskNextRun", tag)}
 }
 

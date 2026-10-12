@@ -1,6 +1,6 @@
 version: "2"
 run:
-  go: "1.25"
+  go: "1.27"
   tests: false
 linters:
   default: all
@@ -19,6 +19,7 @@ linters:
     - wrapcheck
     - revive
     - noinlineerr
+    - exhaustruct_v5
   settings:
     cyclop:
       max-complexity: 12
